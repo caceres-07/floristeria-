@@ -319,8 +319,8 @@ label.fld{display:block;font-size:.78rem;font-weight:500;letter-spacing:.04em;ma
 .care li{margin-left:1.1rem;font-size:.88rem;color:var(--text)}
 
 /* ---------- Admin ---------- */
-.admin-shell{display:grid;grid-template-columns:220px 1fr;min-height:100vh}
-.admin-side{background:var(--green);color:#dbe7dd;padding:1.6rem 1rem;position:sticky;top:0;height:100vh}
+.admin-shell{display:grid;grid-template-columns:220px 1fr;min-height:100vh;padding-top:var(--header-h)}
+.admin-side{background:var(--green);color:#dbe7dd;padding:1.6rem 1rem;position:sticky;top:var(--header-h);height:calc(100vh - var(--header-h))}
 html[data-theme="dark"] .admin-side{background:#0a120d}
 .admin-side .logo{font-family:var(--serif);font-size:1.5rem;color:#fff;margin-bottom:2rem;padding-left:.5rem}
 .admin-side a{display:flex;align-items:center;gap:.7rem;padding:.7rem .9rem;border-radius:12px;font-size:.9rem;margin-bottom:.2rem;color:#b9ccbd;transition:.25s}
@@ -683,6 +683,17 @@ const DB = {
   },
   async logout(){ if(ONLINE) await sb.auth.signOut(); },
   async session(){ if(ONLINE){ const {data}=await sb.auth.getSession(); return !!data.session; } return false; },
+  async uploadImage(file){
+    if(!ONLINE) throw new Error("No hay conexión a Supabase");
+    const {data:sess}=await sb.auth.getSession();
+    if(!sess.session) throw new Error("No autorizado");
+    const ext = file.name.split('.').pop();
+    const fileName = `img_${Date.now()}_${Math.floor(Math.random()*1000)}.${ext}`;
+    const url = `${CFG.supabase.url}/storage/v1/object/products/${fileName}`;
+    const r = await fetch(url, { method: 'POST', headers: { 'Authorization': `Bearer ${sess.session.access_token}`, 'apikey': CFG.supabase.anonKey, 'Content-Type': file.type }, body: file });
+    if(!r.ok){ const err=await r.json(); throw new Error(err.message||'Error subiendo'); }
+    return `${CFG.supabase.url}/storage/v1/object/public/products/${fileName}`;
+  },
   watchOrders(cb){
     if(!ONLINE) return null;
     return sb.channel('orders-rt').on('postgres_changes',{event:'INSERT',schema:'public',table:'orders'},payload=>{
@@ -1598,7 +1609,12 @@ function editProduct(id){
     <div class="frow"><div class="fgroup"><label class="fld">Stock</label><input id="e_stock" type="number" value="${p.stock}"></div><div class="fgroup"><label class="fld">Color</label><select id="e_color">${Object.keys(COLORS).map(c=>`<option ${c===p.color?'selected':''}>${c}</option>`).join('')}</select></div></div>
     <div class="frow"><div class="fgroup"><label class="fld">Tipo de flores</label><input id="e_flor" value="${esc(p.flor)}"></div><div class="fgroup"><label class="fld">Cantidad de flores</label><input id="e_cant" type="number" value="${p.cantidad}"></div></div>
     <div class="frow"><div class="fgroup"><label class="fld">Tamaño</label><select id="e_size">${['Mediano','Grande','XL','XXL','Caja','Maceta'].map(s=>`<option ${s===p.size?'selected':''}>${s}</option>`).join('')}</select></div><div class="fgroup"><label class="fld">Color visual (hex)</label><input id="e_hue" value="${p.hue||'#C97D84'}"></div></div>
-    <div class="fgroup"><label class="fld">URL de imagen (opcional — reemplaza el gráfico)</label><input id="e_img" value="${esc(p.img||'')}" placeholder="https://…"></div>
+    <div class="fgroup">
+      <label class="fld">Imagen del producto</label>
+      <input type="file" id="e_img_file" accept="image/*" style="margin-bottom:.5rem">
+      <small style="display:block;margin-bottom:.2rem;color:var(--muted)">O usa una URL de internet:</small>
+      <input id="e_img" value="${esc(p.img||'')}" placeholder="https://…">
+    </div>
     <div class="fgroup"><label class="fld">Descripción corta</label><input id="e_desc" value="${esc(p.desc)}"></div>
     <div class="fgroup"><label class="fld">Descripción completa</label><textarea id="e_long" rows="3">${esc(p.long||'')}</textarea></div>
     <div class="fgroup"><label class="fld">Ocasiones (separadas por coma)</label><input id="e_occ" value="${(p.occasions||[]).join(', ')}"></div>
@@ -1613,9 +1629,16 @@ function editProduct(id){
 }
 async function saveProduct(pid,exists){
   const g=id=>$('#'+id).value.trim();
+  let imgVal = g('e_img')||null;
+  const fileIn = $('#e_img_file');
+  if(fileIn && fileIn.files.length > 0){
+    toast('Subiendo imagen...', 'gold');
+    try{ imgVal = await DB.uploadImage(fileIn.files[0]); }
+    catch(e){ console.error(e); toast('Error subiendo imagen: '+e.message, 'rose'); return; }
+  }
   const data={id:pid, name:g('e_name'), cat:g('e_cat'), price:+g('e_price')||0, old:g('e_old')?+g('e_old'):null,
     stock:+g('e_stock')||0, color:g('e_color'), flor:g('e_flor'), cantidad:+g('e_cant')||12, size:g('e_size'),
-    hue:g('e_hue')||'#C97D84', img:g('e_img')||null, desc:g('e_desc'), long:g('e_long'),
+    hue:g('e_hue')||'#C97D84', img:imgVal, desc:g('e_desc'), long:g('e_long'),
     occasions:g('e_occ').split(',').map(s=>s.trim()).filter(Boolean),
     care:g('e_care').split('\n').map(s=>s.trim()).filter(Boolean),
     dur:g('e_dur')||'7 días',
@@ -1711,7 +1734,6 @@ async function render(){
   const hash=(location.hash.replace(/^#/,'').split('?')[0])||'/';
   const parts=hash.split('/').filter(Boolean);
   const ftr=$('#siteFooter'); if(ftr) ftr.style.display = parts[0]==='admin' ? 'none' : '';
-  const hdr=document.querySelector('header.site'); if(hdr) hdr.style.display = parts[0]==='admin' ? 'none' : 'flex';
   const app=$('#app');
   window.scrollTo(0,0);
   $('#nav').classList.remove('open');
