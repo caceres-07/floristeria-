@@ -50,8 +50,8 @@ window.CONFIG = {
      Crea tu proyecto gratis en https://supabase.com
      Pega la URL y la llave "anon public" (Settings → API). */
   supabase: {
-    url: "",             // https://xxxxxxxx.supabase.co
-    anonKey: ""          // eyJhbGciOi... (llave anon / public)
+    url: "https://qphwknltplaqdiulvhvc.supabase.co",             // https://xxxxxxxx.supabase.co
+    anonKey: "sb_publishable_Sfzg6X2eJUoV3XWVcgft-w_6Ozf0OFj"          // eyJhbGciOi... (llave anon / public)
   },
 
   /* ---- 5. ENVÍO ---- */

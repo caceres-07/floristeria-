@@ -483,7 +483,6 @@ input,select,textarea{touch-action:manipulation}
       <a href="#/catalogo/Ramos Premium" data-nav="premium">Ramos Premium</a>
       <a href="#/blog" data-nav="/blog">Blog</a>
       <a href="#/faq" data-nav="/faq">FAQ</a>
-      <a href="#/admin" data-nav="/admin">Admin</a>
     </nav>
     <div class="hd-actions">
       <button class="icon-btn" id="themeBtn" title="Modo claro / oscuro" aria-label="Cambiar tema">
@@ -1712,6 +1711,7 @@ async function render(){
   const hash=(location.hash.replace(/^#/,'').split('?')[0])||'/';
   const parts=hash.split('/').filter(Boolean);
   const ftr=$('#siteFooter'); if(ftr) ftr.style.display = parts[0]==='admin' ? 'none' : '';
+  const hdr=document.querySelector('header.site'); if(hdr) hdr.style.display = parts[0]==='admin' ? 'none' : 'flex';
   const app=$('#app');
   window.scrollTo(0,0);
   $('#nav').classList.remove('open');
