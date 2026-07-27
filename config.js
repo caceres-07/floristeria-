@@ -11,8 +11,6 @@ window.CONFIG = {
   negocio: {
     nombre: "ZOLER",
     eslogan: "Diseñado para Sorprender",
-    ciudad: "Bogotá",
-    direccion: "Cra. 13 #85-32, Chapinero",   // ← tu dirección real
     correo: "hola@zoler.co",                   // ← tu correo real
     whatsapp: "573044029343",                  // ← tu WhatsApp (país+numero, sin +)
     telefonoVisible: "+57 304 402 9343",
@@ -39,11 +37,10 @@ window.CONFIG = {
      Crea tu cuenta gratis en https://comercios.wompi.co
      Copia tus llaves. Si las dejas vacías, se usa solo el pago manual. */
   wompi: {
-    publicKey: "",       // pub_prod_xxx o pub_test_xxx
-    redirectUrl: "",     // ej: https://floryalma.co  (a donde vuelve tras pagar)
+    publicKey: "",       // pub_prod_xxx o pub_test_xxx (de comercios.wompi.co)
+    redirectUrl: "https://zoler.co",  // a donde vuelve el cliente tras pagar
     // La firma de integridad se calcula en el servidor (/api/wompi-signature)
-    // usando tu "secreto de integridad". NO lo pongas aquí.
-    activarPruebas: true // true = modo sandbox de Wompi
+    activarPruebas: true // true = modo sandbox
   },
 
   /* ---- 4. SUPABASE (base de datos real + login admin + tiempo real) ----

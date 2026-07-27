@@ -17,11 +17,10 @@
 <!-- Datos estructurados para Google -->
 <script type="application/ld+json" id="ld-business">
 {
-  "@context":"https://schema.org","@type":"Florist",
-  "name":"ZOLER","description":"Floristería premium. Diseñado para Sorprender.",
+  "@context":"https://schema.org","@type":"Store",
+  "name":"ZOLER","description":"Floristería premium online. Diseñado para Sorprender.",
   "url":"https://zoler.co","telephone":"+573044029343",
-  "priceRange":"$$$","address":{"@type":"PostalAddress","addressLocality":"Bogotá","addressCountry":"CO"},
-  "openingHours":["Mo-Fr 08:00-19:00","Sa 09:00-18:00","Su 10:00-14:00"]
+  "priceRange":"$$$","areaServed":"Colombia"
 }
 </script>
 <!-- Base de datos y configuración -->
@@ -60,15 +59,21 @@
   --serif:"Playfair Display",Georgia,serif;
   --sans:"Inter","Segoe UI",system-ui,-apple-system,sans-serif;
 }
-/* ZOLER siempre en modo oscuro — el toggle es opcional */
+/* ZOLER modo claro — negro sobre marfil dorado */
 html[data-theme="light"]{
-  --bg:#F5F0E8; --surface:#FFFFFF; --text:#1A1A1A;
-  --card:rgba(255,255,255,.9); --glass:rgba(245,240,232,.8);
-  --obsidian:#0D0D0D; --obsidian-2:#1A1A1A;
-  --ink:#1A1A1A; --muted:#6B6050; --line:rgba(26,26,26,.12);
-  --shadow:0 18px 50px -20px rgba(0,0,0,.22);
-  --shadow-sm:0 8px 24px -12px rgba(0,0,0,.18);
-  --card:rgba(255,255,255,.85);
+  --bg:#F7F3EC; --surface:#FFFFFF; --text:#1A1A1A;
+  --card:#FFFFFF; --glass:rgba(247,243,236,.95);
+  --obsidian:#1A1A1A; --obsidian-2:#FFFFFF; --obsidian-3:#F7F3EC;
+  --ink:#1A1A1A; --muted:#6B6050; --muted-z:#6B6050;
+  --line:rgba(201,168,76,.2); --line-z:rgba(201,168,76,.2);
+  --shadow:0 8px 40px -16px rgba(0,0,0,.15);
+  --shadow-sm:0 4px 20px -8px rgba(0,0,0,.1);
+  --shadow-gold:0 0 30px -10px rgba(201,168,76,.2);
+  --ivory-z:#1A1A1A; --ivory-2:#2A2015;
+  --gold-soft:#FBF5E6;
+  --sage-soft:#FBF5E6;
+  --rose-soft:#FBF5E6;
+  --cream:#F7F3EC; --cream-2:#EFE9DC; --ivory:#FFFFFF;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
@@ -108,8 +113,15 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 /* ---------- Header ---------- */
 header.site{position:fixed;top:0;left:0;right:0;z-index:90;height:var(--header-h);
   display:flex;align-items:center;
-  background:rgba(13,13,13,.92);backdrop-filter:blur(20px) saturate(1.4);
+  background:rgba(13,13,13,.94);backdrop-filter:blur(20px) saturate(1.4);
   border-bottom:1px solid rgba(201,168,76,.15);transition:.4s}
+html[data-theme="light"] header.site{background:rgba(247,243,236,.96);border-bottom-color:rgba(201,168,76,.22);}
+html[data-theme="light"] .brand-name{color:var(--gold-z)}
+html[data-theme="light"] nav.main a{color:#6B6050}
+html[data-theme="light"] nav.main a:hover{color:var(--gold-z-3)}
+html[data-theme="light"] nav.main a.active{color:var(--gold-z-3)}
+html[data-theme="light"] .icon-btn{color:#6B6050}
+html[data-theme="light"] .icon-btn:hover{background:#F0E8D0;color:#8B6520}
 header.site .wrap{display:flex;align-items:center;gap:1.2rem;width:100%}
 .brand{display:flex;align-items:center;gap:.75rem;text-decoration:none}
 .brand .mark{width:42px;height:42px;flex:0 0 auto}
@@ -371,12 +383,41 @@ tr:hover td{background:var(--gold-soft)}
 .faq-a{padding:0 1.3rem;max-height:0;overflow:hidden;transition:.35s;color:var(--muted);font-size:.9rem}
 .faq-item.open .faq-a{padding:0 1.3rem 1.2rem;max-height:300px}
 .faq-item.open .faq-q svg{transform:rotate(180deg)}
+html[data-theme="light"] .faq-item,.faq-a,.faq-q{color:var(--text)}
 .blog-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.6rem}
-.post{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;backdrop-filter:blur(8px);transition:.35s}
+.post{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;transition:.35s}
 .post:hover{transform:translateY(-5px);box-shadow:var(--shadow-sm)}
 .post .ph{aspect-ratio:16/10;overflow:hidden} .post .pb{padding:1.2rem}
 .post .pb small{color:var(--accent);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase}
 .post .pb h3{font-size:1.4rem;margin:.4rem 0}
+html[data-theme="light"] .post,.post .pb{color:var(--text)}
+
+/* ---------- Checkout ZOLER style ---------- */
+.checkout-steps{display:flex;gap:0;margin-bottom:2rem;border-radius:14px;overflow:hidden;border:1px solid var(--line)}
+.checkout-step{flex:1;padding:.7rem;text-align:center;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;font-weight:600;background:var(--obsidian-2);color:var(--muted-z);position:relative}
+.checkout-step.active{background:linear-gradient(135deg,var(--gold-z),var(--gold-z-3));color:#0D0D0D}
+.checkout-step.done{background:var(--gold-soft);color:var(--gold-z)}
+html[data-theme="light"] .checkout-step{background:#EFE9DC;color:#8B6520}
+html[data-theme="light"] .checkout-step.done{background:#F0E8D0;color:var(--gold-z-3)}
+.pay-method-btn{display:flex;align-items:center;gap:1rem;padding:1rem 1.2rem;border-radius:14px;border:2px solid var(--line);background:var(--obsidian-2);cursor:pointer;transition:.3s;width:100%;text-align:left;margin-bottom:.6rem}
+.pay-method-btn:hover{border-color:var(--gold-z);background:var(--gold-soft)}
+.pay-method-btn.selected{border-color:var(--gold-z);background:var(--gold-soft);box-shadow:var(--shadow-gold)}
+.pay-method-btn .pm-icon{font-size:1.8rem;flex:0 0 auto}
+.pay-method-btn .pm-name{font-weight:600;font-size:.95rem}
+.pay-method-btn .pm-desc{font-size:.76rem;color:var(--muted-z);margin-top:.15rem}
+.pay-method-btn .pm-badge{margin-left:auto;font-size:.62rem;background:var(--ok);color:#fff;padding:.2rem .5rem;border-radius:999px;font-weight:700;letter-spacing:.06em;flex-shrink:0}
+html[data-theme="light"] .pay-method-btn{background:#FFFFFF;border-color:rgba(201,168,76,.25);color:#1A1A1A}
+html[data-theme="light"] .pay-method-btn:hover,.pay-method-btn.selected{background:#FBF5E6}
+.order-summary-sticky{position:sticky;top:calc(var(--header-h) + 16px)}
+
+/* ---------- Animaciones scroll ---------- */
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .55s cubic-bezier(.2,.7,.3,1),transform .55s cubic-bezier(.2,.7,.3,1)}
+.reveal.visible{opacity:1;transform:none}
+.reveal-left{opacity:0;transform:translateX(-24px);transition:opacity .55s cubic-bezier(.2,.7,.3,1),transform .55s cubic-bezier(.2,.7,.3,1)}
+.reveal-left.visible{opacity:1;transform:none}
+.reveal-scale{opacity:0;transform:scale(.96);transition:opacity .5s cubic-bezier(.2,.7,.3,1),transform .5s cubic-bezier(.2,.7,.3,1)}
+.reveal-scale.visible{opacity:1;transform:scale(1)}
+@media(prefers-reduced-motion:reduce){.reveal,.reveal-left,.reveal-scale{opacity:1;transform:none;transition:none}}
 
 /* ---------- Responsive ---------- */
 @media(max-width:1080px){
@@ -993,9 +1034,9 @@ function viewHome(){
         <a href="#/catalogo/Ramos Premium" class="btn btn-ghost">Ver ramos premium</a>
       </div>
       <div class="hero-stats">
-        <div><span>+3.500</span><small>Detalles entregados</small></div>
-        <div><span>4.9★</span><small>Calificación media</small></div>
-        <div><span>Mismo día</span><small>Entrega en la ciudad</small></div>
+        <div><span id="stat1">+3.500</span><small>Detalles entregados</small></div>
+        <div><span id="stat2">4.9★</span><small>Calificación media</small></div>
+        <div><span id="stat3">Mismo día</span><small>Envío express</small></div>
       </div>
     </div></div>
   </section>
@@ -1028,7 +1069,7 @@ function viewHome(){
   <section class="block" style="background:var(--cream-2)"><div class="wrap">
     <div class="sec-head center" style="justify-content:center"><div><span class="eyebrow">Lo que dicen</span><h2>Opiniones de clientes</h2></div></div>
     <div class="testi-grid">
-      ${[['Valentina R.','Cliente frecuente','Pedí el Ramo Elegancia Roja para mi aniversario y llegó impecable, puntual y aún más lindo que en la foto. Repetiré sin duda.','V'],['Andrés M.','Bogotá','El servicio al cliente por WhatsApp fue rapidísimo y me ayudaron a elegir. Mi mamá quedó feliz con los girasoles.','A'],['Carolina T.','Novia feliz','Las flores del matrimonio superaron todas mis expectativas. Elegancia pura. Gracias, Flor & Alma.','C']].map(t=>`<div class="testi"><span class="q">"</span><p>${t[2]}</p><div class="who"><div class="ava">${t[3]}</div><div><b>${t[0]}</b><small>${t[1]}</small></div></div>${starsHtml(5)}</div>`).join('')}
+      ${[['Valentina R.','Cliente frecuente','Pedí el Ramo Elegancia Roja para mi aniversario y llegó impecable, puntual y aún más lindo que en la foto. Repetiré sin duda.','V'],['Andrés M.','Cliente frecuente','El servicio al cliente por WhatsApp fue rapidísimo y me ayudaron a elegir. Mi mamá quedó feliz con los girasoles.','A'],['Carolina T.','Novia feliz','Las flores del matrimonio superaron todas mis expectativas. Elegancia pura. Gracias, ZOLER.','C']].map(t=>`<div class="testi reveal"><span class="q">“</span><p>${t[2]}</p><div class="who"><div class="ava">${t[3]}</div><div><b>${t[0]}</b><small>${t[1]}</small></div></div>${starsHtml(5)}</div>`).join('')}
     </div>
   </div></section>
 
@@ -1037,11 +1078,13 @@ function viewHome(){
     <div class="gallery">${['#C97D84','#8AA893','#C6A15B','#E7BFC2','#7a9a82','#d99f78'].map((h,i)=>{const fp={id:'g'+i,cantidad:12,hue:h,name:'Arreglo'};return `<div class="g">${flowerSVG(fp)}</div>`;}).join('')}</div>
   </div></section>
 
-  <section class="block" style="background:var(--cream-2)" id="contacto"><div class="wrap">
-    <div class="sec-head"><div><span class="eyebrow">Visítanos</span><h2>Contacto y ubicación</h2></div></div>
+  <section class="block" id="contacto"><div class="wrap">
+    <div class="sec-head">
+      <div><span class="eyebrow">Contáctanos</span><h2>Atención al cliente</h2></div>
+    </div>
     <div class="contact-grid">
-      <div class="info-card">
-        <div class="info-row"><div class="ic">📍</div><div><b>Dirección</b><br><span>${CONTACT.addr}, ${CONTACT.city}</span></div></div>
+      <div class="info-card reveal">
+        <div class="info-row"><div class="ic">📦</div><div><b>Envíos</b><br><span>Realizamos envíos a todo Colombia. Tiempo de entrega: mismo día o 24–48h según tu ciudad.</span></div></div>
         <div class="info-row"><div class="ic">📞</div><div><b>Teléfono</b><br><span>${CONTACT.display}</span></div></div>
         <div class="info-row"><div class="ic">✉️</div><div><b>Correo</b><br><span>${CONTACT.email}</span></div></div>
         <div class="info-row"><div class="ic">🕑</div><div><b>Horarios de atención</b><br>${CONTACT.hours.map(h=>`<span>${h}</span>`).join('<br>')}</div></div>
@@ -1052,8 +1095,14 @@ function viewHome(){
           <a id="waLink2" href="#" aria-label="WhatsApp" title="WhatsApp">✆</a>
         </div>
       </div>
-      <iframe class="map-embed" title="Mapa de ubicación" loading="lazy" referrerpolicy="no-referrer-when-downgrade"
-        src="https://www.google.com/maps?q=${encodeURIComponent(CONTACT.addr+', '+CONTACT.city)}&output=embed"></iframe>
+      <div class="info-card reveal" style="display:flex;flex-direction:column;justify-content:center;align-items:center;gap:1.6rem;padding:3rem 2rem;text-align:center">
+        <svg width="80" height="80" viewBox="0 0 80 80" fill="none"><circle cx="40" cy="40" r="40" fill="var(--gold-soft)"/><circle cx="40" cy="40" r="38" fill="none" stroke="var(--gold-z)" stroke-width="1"/><text x="40" y="54" text-anchor="middle" font-family="Georgia,serif" font-size="48" font-weight="bold" fill="var(--gold-z)">Z</text></svg>
+        <div>
+          <h3 style="font-size:1.6rem;margin-bottom:.5rem">ZOLER</h3>
+          <p style="color:var(--muted-z);font-size:.9rem;line-height:1.7">Diseñado para Sorprender.<br>Flores y arreglos de autor para toda Colombia.</p>
+        </div>
+        <a id="waLink3" href="#" class="btn btn-primary" target="_blank" rel="noopener">💬 Escríbenos por WhatsApp</a>
+      </div>
     </div>
   </div></section>`;
 }
@@ -1217,40 +1266,35 @@ function viewWishlist(){
 function viewCheckout(){
   if(!cart.length) return `<div class="wrap block" style="padding-top:120px"><div class="empty"><span class="em">🛒</span>Tu carrito está vacío.<br><br><a href="#/catalogo" class="btn btn-primary btn-sm">Ir al catálogo</a></div></div>`;
   const t=cartTotals();
-  return `<div class="wrap block" style="padding-top:calc(var(--header-h) + 2rem)">
-    <div class="sec-head"><div><span class="eyebrow">Casi listo</span><h2>Finalizar compra</h2></div></div>
-    <div class="contact-grid" style="align-items:start">
-      <div class="info-card">
-        <h4 style="font-size:1.4rem;margin-bottom:1rem">Datos de entrega</h4>
-        <div class="frow"><div class="fgroup"><label class="fld">Nombre completo *</label><input id="f_name"></div><div class="fgroup"><label class="fld">Teléfono *</label><input id="f_phone" inputmode="tel"></div></div>
-        <div class="fgroup"><label class="fld">Correo electrónico *</label><input id="f_email" type="email"></div>
-        <div class="fgroup"><label class="fld">Dirección *</label><input id="f_addr"></div>
-        <div class="frow"><div class="fgroup"><label class="fld">Ciudad *</label><input id="f_city" value="${CONTACT.city}"></div><div class="fgroup"><label class="fld">Barrio</label><input id="f_hood"></div></div>
-        <div class="frow"><div class="fgroup"><label class="fld">Fecha de entrega *</label><input id="f_date" type="date"></div><div class="fgroup"><label class="fld">Hora de entrega</label><input id="f_time" type="time"></div></div>
-        <div class="frow"><div class="fgroup"><label class="fld">Persona que recibe</label><input id="f_recv"></div><div class="fgroup"><label class="fld">Observaciones</label><input id="f_notes"></div></div>
-        <div class="fgroup"><label class="fld">Mensaje para la tarjeta 💌</label><textarea id="f_card" rows="2" placeholder="Con todo mi cariño…"></textarea></div>
-        <h4 style="font-size:1.4rem;margin:1rem 0">Método de pago</h4>
-        <div style="display:flex;flex-direction:column;gap:.5rem" id="payMethods">
-          ${CFG.wompi&&CFG.wompi.publicKey?`<label class="check" style="border:1px solid var(--line);border-radius:12px;padding:.8rem;margin:0"><input type="radio" name="pay" value="Wompi" checked onchange="togglePayInfo()"> 💳 Pago en línea — Nequi, Bancolombia, PSE o tarjeta <small style="color:var(--ok);margin-left:auto">automático</small></label>`:''}
-          <label class="check" style="border:1px solid var(--line);border-radius:12px;padding:.8rem;margin:0"><input type="radio" name="pay" value="Nequi" ${CFG.wompi&&CFG.wompi.publicKey?'':'checked'} onchange="togglePayInfo()"> 📱 Nequi (transferencia)</label>
-          <label class="check" style="border:1px solid var(--line);border-radius:12px;padding:.8rem;margin:0"><input type="radio" name="pay" value="Bancolombia" onchange="togglePayInfo()"> 🏦 Bancolombia (transferencia)</label>
-          <label class="check" style="border:1px solid var(--line);border-radius:12px;padding:.8rem;margin:0"><input type="radio" name="pay" value="Efectivo contra entrega" onchange="togglePayInfo()"> 💵 Efectivo contra entrega</label>
+  return `<div style="background:#0D0D0D;min-height:100vh;padding-top:calc(var(--header-h) + 2rem);padding-bottom:4rem;color:#F5F0E8">
+  <div class="wrap">
+    <div class="sec-head" style="margin-bottom:1.6rem"><div><span class="eyebrow" style="color:#C9A84C">Casi listo</span><h2 style="font-size:2.2rem;font-family:Georgia,serif">Finalizar compra</h2></div></div>
+    <div class="checkout-grid" style="display:grid;grid-template-columns:1fr 400px;gap:2.4rem;align-items:start">
+      <div class="checkout-form">
+        <div class="info-card" style="background:#1A1A1A;border:1px solid #2A2315">
+          <h4 style="font-size:1.1rem;margin-bottom:1.4rem;color:#C9A84C">Información de Entrega</h4>
+          <div class="f-group"><label>Nombre completo</label><input id="f_name" placeholder="Tu nombre"></div>
+          <div class="f-group"><label>Teléfono</label><input id="f_phone" placeholder="300 000 0000"></div>
+          <div class="f-group"><label>Correo</label><input id="f_email" type="email" placeholder="email@ejemplo.com"></div>
+          <div class="f-group"><label>Dirección</label><input id="f_addr" placeholder="Calle, Carrera, Barrio"></div>
+          <div class="f-row" style="display:flex;gap:1rem">
+             <div class="f-group" style="flex:1"><label>Ciudad</label><input id="f_city" placeholder="Ciudad"></div>
+             <div class="f-group" style="flex:1"><label>Fecha</label><input id="f_date" type="date"></div>
+          </div>
+          <div class="f-group"><label>Mensaje para la tarjeta</label><textarea id="f_card" rows="2" placeholder="Escribe un mensaje para quien recibe..."></textarea></div>
         </div>
-        <div id="payInfo"></div>
-        <p style="font-size:.78rem;color:var(--muted);margin-top:.8rem">🔒 Tus datos se procesan de forma segura.</p>
       </div>
-      <div class="info-card" style="position:sticky;top:calc(var(--header-h) + 16px)">
-        <h4 style="font-size:1.4rem;margin-bottom:1rem">Resumen del pedido</h4>
-        ${cart.filter(i=>PRODUCTS.find(x=>x.id===i.id)).map(i=>{const p=PRODUCTS.find(x=>x.id===i.id);return `<div class="sum-row"><span>${esc(p.name)} × ${i.qty}</span><span>${money(p.price*i.qty)}</span></div>`;}).join('')}
-        <div class="divider"></div>
-        <div class="sum-row"><span>Subtotal</span><span>${money(t.sub)}</span></div>
-        ${t.disc?`<div class="sum-row" style="color:var(--rose-deep)"><span>Descuento</span><span>−${money(t.disc)}</span></div>`:''}
-        <div class="sum-row"><span>Envío</span><span>${t.ship===0?'Gratis':money(t.ship)}</span></div>
-        <div class="sum-row total"><span>Total</span><span>${money(t.total)}</span></div>
-        <button class="btn btn-primary btn-block" style="margin-top:1rem" onclick="placeOrder()">Confirmar pedido</button>
+      <div class="order-sticky" style="position:sticky;top:90px;background:#1A1A1A;padding:2rem;border-radius:12px;border:1px solid #2A2315">
+        <h4 style="margin-bottom:1rem">Resumen</h4>
+        <div class="sum-items" style="font-size:.9rem">
+            ${cart.map(i=>{const p=PRODUCTS.find(x=>x.id===i.id);return `<div class="sum-row" style="display:flex;justify-content:space-between;margin-bottom:.4rem"><span>${i.qty}× ${p.name}</span><span>${money(p.price*i.qty)}</span></div>`}).join('')}
+        </div>
+        <div class="divider" style="height:1px;background:#2A2315;margin:1rem 0"></div>
+        <div class="sum-total" style="display:flex;justify-content:space-between;font-size:1.2rem;font-weight:700;color:#C9A84C"><span>Total</span><span>${money(t.total)}</span></div>
+        <button class="btn btn-primary btn-block" style="margin-top:1.5rem;width:100%;padding:1rem;background:#C9A84C;color:#0D0D0D;border:none;font-weight:bold" onclick="placeOrder()">CONFIRMAR PEDIDO</button>
       </div>
     </div>
-  </div>`;
+  </div></div>`;
 }
 function payManualInfo(method){
   const pm = CFG.pagoManual||{};
@@ -1279,7 +1323,7 @@ function togglePayInfo(){
    FACTURA / RECIBO — generadores de texto y HTML
    ============================================================ */
 function generateInvoiceText(num, info){
-  const neg=N.nombre||'Flor & Alma', pm=CFG.pagoManual||{};
+  const neg=N.nombre||'ZOLER', pm=CFG.pagoManual||{};
   const fmtDate=d=>{if(!d)return '';try{const[y,m,dd]=d.split('-');return `${dd}/${m}/${y}`;}catch(e){return d;}};
   let t=`✨ *Pedido confirmado*\n*${neg}* — Floristería de autor\n\n`;
   t+=`🧳 *Número de pedido:* ${num}\n`;
@@ -1301,45 +1345,52 @@ function generateInvoiceText(num, info){
   return t;
 }
 function generateInvoiceHtml(num, info){
-  const neg=N.nombre||'Flor & Alma', pm=CFG.pagoManual||{};
+  const neg=N.nombre||'ZOLER', pm=CFG.pagoManual||{};
   const fmtDate=d=>{if(!d)return '';try{const[y,m,dd]=d.split('-');return `${dd}/${m}/${y}`;}catch(e){return d;}};
   const rows=Array.isArray(info.items)&&info.items.length
-    ?info.items.map(i=>`<tr><td style="padding:9px 14px;border-bottom:1px solid #f0e9de">${i.name}</td><td style="padding:9px 14px;border-bottom:1px solid #f0e9de;text-align:center">${i.qty}</td><td style="padding:9px 14px;border-bottom:1px solid #f0e9de;text-align:right">${money(i.price)}</td><td style="padding:9px 14px;border-bottom:1px solid #f0e9de;text-align:right;font-weight:700">${money(i.price*i.qty)}</td></tr>`).join('')
+    ?info.items.map(i=>`<tr><td style="padding:10px 16px;border-bottom:1px solid #2A2315;color:#F5F0E8">${i.name}</td><td style="padding:10px 16px;border-bottom:1px solid #2A2315;text-align:center;color:#F5F0E8">${i.qty}</td><td style="padding:10px 16px;border-bottom:1px solid #2A2315;text-align:right;color:#8A8070">${money(i.price)}</td><td style="padding:10px 16px;border-bottom:1px solid #2A2315;text-align:right;font-weight:700;color:#C9A84C">${money(i.price*i.qty)}</td></tr>`).join('')
     :'';
   let payInfo='';
-  if(info.pay==='Nequi'&&pm.nequi) payInfo=`<div style="background:#eef7ee;border-radius:10px;padding:14px;font-size:13px;line-height:1.6">📲 Transfiere <strong>${money(info.total)}</strong> al Nequi <strong>${pm.nequi}</strong> y envíanos la captura por WhatsApp.</div>`;
-  else if(info.pay==='Bancolombia'&&pm.bancolombia){const b=pm.bancolombia;payInfo=`<div style="background:#eef7ee;border-radius:10px;padding:14px;font-size:13px;line-height:1.6">🏦 Cta ${b.tipo||'Ahorros'} <strong>${b.numero||''}</strong><br>Titular: ${b.titular||''} &middot; ${b.cedula||''}<br>Envíanos el comprobante por WhatsApp.</div>`;}
-  return `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Pedido ${num}</title></head>
-<body style="margin:0;padding:20px;background:#f7f1e8;font-family:'Segoe UI',sans-serif">
-<div style="max-width:600px;margin:0 auto;background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 6px 32px rgba(0,0,0,.09)">
-  <div style="background:#274235;padding:28px 32px;text-align:center">
-    <h1 style="color:#fff;margin:0;font-size:24px;letter-spacing:.5px">${neg}</h1>
-    <p style="color:#9dbaaa;margin:6px 0 0;font-size:13px">Floristería de autor &middot; ${N.ciudad||'Bogotá'}</p>
+  if(info.pay==='Nequi'&&pm.nequi) payInfo=`<div style="background:#2A2315;border-radius:12px;padding:16px;font-size:13px;line-height:1.6;color:#E8C97A">&#128242; Transfiere <strong>${money(info.total)}</strong> al Nequi <strong>${pm.nequi}</strong> y envíanos la captura por WhatsApp para confirmar tu pedido.</div>`;
+  else if(info.pay==='Bancolombia'&&pm.bancolombia){const b=pm.bancolombia;payInfo=`<div style="background:#2A2315;border-radius:12px;padding:16px;font-size:13px;line-height:1.6;color:#E8C97A">&#127970; Cta ${b.tipo||'Ahorros'} <strong>${b.numero||''}</strong><br>Titular: ${b.titular||''} &middot; ${b.cedula||''}<br>Envíanos el comprobante por WhatsApp.</div>`;}
+  return `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Pedido ${num} — ZOLER</title></head>
+<body style="margin:0;padding:24px;background:#0D0D0D;font-family:'Segoe UI',Arial,sans-serif">
+<div style="max-width:600px;margin:0 auto;background:#1A1A1A;border-radius:20px;overflow:hidden;border:1px solid rgba(201,168,76,.2);box-shadow:0 20px 60px rgba(0,0,0,.5)">
+  <div style="background:#0D0D0D;padding:32px;text-align:center;border-bottom:1px solid rgba(201,168,76,.15)">
+    <div style="width:70px;height:70px;background:#0D0D0D;border:1px solid #C9A84C;border-radius:50%;margin:0 auto 14px;display:flex;align-items:center;justify-content:center">
+      <span style="font-family:Georgia,serif;font-size:40px;font-weight:bold;color:#C9A84C">Z</span>
+    </div>
+    <h1 style="color:#C9A84C;margin:0;font-size:28px;letter-spacing:.2em;font-family:Georgia,serif">ZOLER</h1>
+    <p style="color:#8A8070;margin:6px 0 0;font-size:12px;letter-spacing:.18em;text-transform:uppercase">DISEÑADO PARA SORPRENDER</p>
   </div>
   <div style="padding:28px 32px">
-    <div style="background:#f9f3ea;border-radius:12px;padding:16px 20px;margin-bottom:22px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
-      <div><p style="margin:0;font-size:11px;color:#8a7a6a;text-transform:uppercase;letter-spacing:.1em">Número de pedido</p><p style="margin:4px 0 0;font-size:22px;font-weight:700;color:#274235">${num}</p></div>
-      <div style="text-align:right"><p style="margin:0;font-size:11px;color:#8a7a6a">Fecha</p><p style="margin:4px 0 0;font-size:14px">${new Date().toLocaleDateString('es-CO',{year:'numeric',month:'long',day:'numeric'})}</p></div>
+    <div style="background:#242424;border-radius:14px;padding:18px 22px;margin-bottom:24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;border:1px solid rgba(201,168,76,.1)">
+      <div><p style="margin:0;font-size:11px;color:#8A8070;text-transform:uppercase;letter-spacing:.12em">Número de pedido</p><p style="margin:6px 0 0;font-size:24px;font-weight:700;color:#C9A84C;font-family:Georgia,serif">${num}</p></div>
+      <div style="text-align:right"><p style="margin:0;font-size:11px;color:#8A8070">Fecha</p><p style="margin:6px 0 0;font-size:13px;color:#F5F0E8">${new Date().toLocaleDateString('es-CO',{year:'numeric',month:'long',day:'numeric'})}</p></div>
     </div>
-    ${rows?`<table style="width:100%;border-collapse:collapse;margin-bottom:20px"><thead><tr style="background:#f4ece0"><th style="padding:10px 14px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:#8a7a6a">Producto</th><th style="padding:10px 14px;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:#8a7a6a">Cant</th><th style="padding:10px 14px;text-align:right;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:#8a7a6a">P.Unit</th><th style="padding:10px 14px;text-align:right;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:#8a7a6a">Subtotal</th></tr></thead><tbody>${rows}</tbody></table>`:''}
-    <div style="border-top:2px solid #f0e9de;padding:16px 0;margin-bottom:20px">
-      ${info.disc?`<div style="display:flex;justify-content:space-between;font-size:13px;padding:3px 0;color:#a8623a"><span>Descuento</span><span>-${money(info.disc)}</span></div>`:''}
-      <div style="display:flex;justify-content:space-between;font-size:13px;padding:3px 0;color:#6e7c71"><span>Envío</span><span>${info.ship===0?'Gratis':money(info.ship)}</span></div>
-      <div style="display:flex;justify-content:space-between;font-size:19px;font-weight:700;color:#274235;padding:8px 0 0"><span>Total</span><span>${money(info.total)}</span></div>
+    ${rows?`<table style="width:100%;border-collapse:collapse;margin-bottom:22px;background:#242424;border-radius:12px;overflow:hidden;border:1px solid rgba(201,168,76,.1)">
+      <thead><tr style="background:#0D0D0D"><th style="padding:10px 16px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:#8A8070">Producto</th><th style="padding:10px 16px;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:#8A8070">Cant</th><th style="padding:10px 16px;text-align:right;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:#8A8070">P.Unit</th><th style="padding:10px 16px;text-align:right;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:#8A8070">Subtotal</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`:''}
+    <div style="border-top:1px solid rgba(201,168,76,.15);padding:16px 0;margin-bottom:22px">
+      ${info.disc?`<div style="display:flex;justify-content:space-between;font-size:13px;padding:3px 0;color:#4caf7d"><span>Descuento</span><span>−${money(info.disc)}</span></div>`:''}
+      <div style="display:flex;justify-content:space-between;font-size:13px;padding:3px 0;color:#8A8070"><span>Envío</span><span>${info.ship===0?'Gratis':money(info.ship)}</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:20px;font-weight:700;color:#C9A84C;padding:10px 0 0"><span>Total</span><span>${money(info.total)}</span></div>
     </div>
-    <div style="background:#f9f3ea;border-radius:12px;padding:16px 20px;margin-bottom:18px">
-      <p style="margin:0 0 8px;font-size:12px;font-weight:700;color:#274235;text-transform:uppercase;letter-spacing:.08em">Entrega</p>
-      <p style="margin:2px 0;font-size:15px;font-weight:600">${info.name}</p>
-      ${info.address?`<p style="margin:3px 0;font-size:13px;color:#6e7c71">📍 ${info.address}, ${info.city||''}</p>`:''}
-      ${info.delivDate?`<p style="margin:3px 0;font-size:13px;color:#6e7c71">📅 ${fmtDate(info.delivDate)}${info.delivTime?' a las '+info.delivTime:''}</p>`:''}
-      ${info.receiver?`<p style="margin:3px 0;font-size:13px;color:#6e7c71">👥 Recibe: ${info.receiver}</p>`:''}
-      ${info.card?`<p style="margin:10px 0 0;font-size:13px;color:#c97d84;font-style:italic">💌 "${info.card}"</p>`:''}
+    <div style="background:#242424;border-radius:12px;padding:16px 20px;margin-bottom:18px;border:1px solid rgba(201,168,76,.1)">
+      <p style="margin:0 0 10px;font-size:11px;font-weight:700;color:#C9A84C;text-transform:uppercase;letter-spacing:.1em">Datos de envío</p>
+      <p style="margin:2px 0;font-size:15px;font-weight:600;color:#F5F0E8">${info.name}</p>
+      ${info.address?`<p style="margin:4px 0;font-size:13px;color:#8A8070">📦 ${info.address}${info.city?', '+info.city:''}</p>`:''}
+      ${info.delivDate?`<p style="margin:4px 0;font-size:13px;color:#8A8070">📅 ${fmtDate(info.delivDate)}${info.delivTime?' a las '+info.delivTime:''}</p>`:''}
+      ${info.receiver?`<p style="margin:4px 0;font-size:13px;color:#8A8070">👥 Recibe: ${info.receiver}</p>`:''}
+      ${info.card?`<p style="margin:12px 0 0;font-size:13px;color:#C9A84C;font-style:italic">💌 "${info.card}"</p>`:''}
     </div>
     ${payInfo}
   </div>
-  <div style="background:#274235;padding:18px 32px;text-align:center">
-    <p style="color:#9dbaaa;font-size:13px;margin:0">¿Dudas? Escíbenos</p>
-    <p style="color:#c6a15b;font-size:15px;font-weight:600;margin:4px 0 0">wa.me/${CONTACT.phone}</p>
+  <div style="background:#0D0D0D;padding:20px 32px;text-align:center;border-top:1px solid rgba(201,168,76,.1)">
+    <p style="color:#8A8070;font-size:12px;margin:0">¿Dudas? Escríbenos</p>
+    <p style="color:#C9A84C;font-size:15px;font-weight:600;margin:6px 0 0;letter-spacing:.04em">wa.me/${CONTACT.phone}</p>
+    <p style="color:#4A4035;font-size:11px;margin:10px 0 0;letter-spacing:.14em">ZOLER — DISEÑADO PARA SORPRENDER</p>
   </div>
 </div></body></html>`;
 }
@@ -1389,10 +1440,10 @@ async function placeOrder(){
       address:payload.address, city:payload.city, receiver:payload.receiver, card:payload.card_message,
       pay:method, total:totalGuardado, sub:t.sub, disc:t.disc, ship:t.ship, items};
     const htmlFactura = generateInvoiceHtml(num, invoiceInfo);
-    const negName = N.nombre||'Flor & Alma';
+    const negName = N.nombre||'ZOLER';
     // Email al cliente
     fetch('/api/send-email',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({to:payload.email,subject:`🌸 Tu pedido ${num} — ${negName}`,html:htmlFactura})
+      body:JSON.stringify({to:payload.email,subject:`★ Tu pedido ${num} — ZOLER`,html:htmlFactura})
     }).catch(()=>{});
     // Email al admin / dueño de la tienda
     const adminEmail = N.correo;
@@ -1788,18 +1839,21 @@ async function render(){
   // Home por defecto
   app.innerHTML=viewHome();
   const w2=$('#waLink2'); if(w2)w2.href=waLink();
+  const w3=$('#waLink3'); if(w3)w3.href=waLink();
   document.querySelector('[data-nav="/"]')?.classList.add('active');
+  // Activar animaciones de scroll en la home
+  requestAnimationFrame(()=>initScrollReveal());
 }
 window.addEventListener('hashchange',render);
 
 /* Rellena el footer con los datos del negocio */
 function fillFooter(){
-  const nombre=N.nombre||'Flor & Alma';
+  const nombre=N.nombre||'ZOLER';
   const fb=$('#fBrand'); if(fb)fb.textContent=nombre;
   const fc=$('#fCopy'); if(fc)fc.innerHTML=`© ${new Date().getFullYear()} ${esc(nombre)}. Todos los derechos reservados.`;
   const fw=$('#fWa'); if(fw)fw.href=waLink();
   const c=$('#fContact');
-  if(c)c.innerHTML=`<li>${esc(CONTACT.addr)}, ${esc(CONTACT.city)}</li><li>${esc(CONTACT.display)}</li><li>${esc(CONTACT.email)}</li>`;
+  if(c)c.innerHTML=`<li>${esc(CONTACT.display)}</li><li>${esc(CONTACT.email)}</li>`;
 }
 async function subscribeNews(){
   const el=$('#newsEmail'); const v=(el&&el.value||'').trim();
@@ -1821,17 +1875,45 @@ function applySEO(){
   });
   const ld=$('#ld-business');
   if(ld) ld.textContent=JSON.stringify({
-    "@context":"https://schema.org","@type":"Florist","name":nombre,
-    "description":`Floristería en ${ciudad}: flores, ramos y arreglos florales con entrega a domicilio.`,
-    "url":url,"telephone":"+"+(N.whatsapp||'573044029343'),"priceRange":"$$",
-    "address":{"@type":"PostalAddress","streetAddress":N.direccion||'',"addressLocality":ciudad,"addressCountry":"CO"},
-    "openingHours":["Mo-Fr 08:00-19:00","Sa 09:00-18:00","Su 10:00-14:00"]
+    "@context":"https://schema.org","@type":"Store","name":nombre,
+    "description":"Floristería premium online. Diseñado para Sorprender. Envíos a todo Colombia.",
+    "url":url,"telephone":"+"+(N.whatsapp||'573044029343'),"priceRange":"$$$",
+    "areaServed":"Colombia"
   });
 }
 
 /* ============================================================
    ARRANQUE
    ============================================================ */
+/* ---------- Scroll reveal (Intersection Observer) ---------- */
+function initScrollReveal(){
+  const obs=new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){
+        e.target.classList.add('visible');
+        obs.unobserve(e.target);
+      }
+    });
+  },{threshold:0.12,rootMargin:'0px 0px -40px 0px'});
+  document.querySelectorAll('.reveal,.reveal-left,.reveal-scale').forEach((el,i)=>{
+    el.style.transitionDelay=(i%8)*.07+'s';
+    obs.observe(el);
+  });
+}
+/* ---------- Seleccionar metodo de pago ---------- */
+function selectPay(method){
+  document.querySelectorAll('.pay-method-btn').forEach(b=>b.classList.remove('selected'));
+  const id='pm_'+method.toLowerCase().replace(/ /g,'_').replace('efectivo_contra_entrega','efectivo');
+  const btn=document.getElementById(id)||document.querySelector('.pay-method-btn');
+  if(btn) btn.classList.add('selected');
+  // Guardar metodo seleccionado en dataset del boton confirmar
+  const confirmBtn=document.querySelector('[onclick="placeOrder()"]');
+  if(confirmBtn) confirmBtn.dataset.pay=method;
+  togglePayInfo();
+  // Mostrar info del metodo
+  const pi=$('#payInfo');
+  if(pi) pi.innerHTML=payManualInfo(method);
+}
 (async function(){
   applySEO();
   fillFooter();
@@ -1843,7 +1925,7 @@ function applySEO(){
 /* Exponer funciones usadas en atributos onclick */
 Object.assign(window,{addToCart,buyNow,setQty,removeFromCart,clearCart,toggleFav,applyCoupon,openCart,closeCart,
   toggleFilter,resetFilters,toggleFilters,renderResults,setMaxPrice,setAvailOnly,zoomImg,setRating,submitReview,placeOrder,adminLogin,adminLogout,adminGo,renderAdminMain,
-  setOrderState,setStock,delProduct,editProduct,saveProduct,openModal,closeModal,togglePayInfo,markPaid,exportOrdersCSV,subscribeNews,readPost});
+  setOrderState,setStock,delProduct,editProduct,saveProduct,openModal,closeModal,togglePayInfo,markPaid,exportOrdersCSV,subscribeNews,readPost,selectPay,initScrollReveal});
 </script>
 </body>
 </html>
