@@ -1,5 +1,5 @@
 /* ============================================================
-   FLOR & ALMA — CONFIGURACIÓN
+   ZOLER — CONFIGURACIÓN
    Este es el ÚNICO archivo que necesitas editar para poner en
    marcha tu tienda real. Rellena los datos y guarda.
    Mientras las llaves de Supabase estén vacías, la tienda
@@ -9,15 +9,15 @@ window.CONFIG = {
 
   /* ---- 1. NEGOCIO (aparece en la web y en Google) ---- */
   negocio: {
-    nombre: "Flor & Alma",
-    eslogan: "Floristería de autor",
+    nombre: "ZOLER",
+    eslogan: "Diseñado para Sorprender",
     ciudad: "Bogotá",
     direccion: "Cra. 13 #85-32, Chapinero",   // ← tu dirección real
-    correo: "hola@floryalma.co",               // ← tu correo real
+    correo: "hola@zoler.co",                   // ← tu correo real
     whatsapp: "573044029343",                  // ← tu WhatsApp (país+numero, sin +)
     telefonoVisible: "+57 304 402 9343",
-    urlSitio: "https://floryalma.co",          // ← el dominio que publiques
-    instagram: "https://instagram.com/",
+    urlSitio: "https://zoler.co",              // ← el dominio que publiques
+    instagram: "https://instagram.com/zoler.co",
     facebook: "https://facebook.com/",
     tiktok: "https://tiktok.com/"
   },
