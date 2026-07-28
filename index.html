@@ -144,7 +144,7 @@ nav.main a.active{color:var(--gold-z);font-weight:500}
 .hero{position:relative;min-height:92vh;display:flex;align-items:center;padding-top:var(--header-h);overflow:hidden}
 .hero-bg{position:absolute;inset:0;z-index:-2}
 .hero-bg::after{content:"";position:absolute;inset:0;
-  background:linear-gradient(115deg,var(--bg) 10%,rgba(13,13,13,.7) 50%,rgba(13,13,13,0) 80%)}
+  background:linear-gradient(115deg,var(--bg) 15%,transparent 60%)}
 .hero-inner{max-width:660px;position:relative;z-index:2;animation:rise .9s cubic-bezier(.2,.7,.3,1)}
 .hero h1{font-size:clamp(2.8rem,6.5vw,5.2rem);letter-spacing:.3px;margin:.6rem 0 1rem;line-height:1.05}
 .hero h1 em{font-style:italic;color:var(--gold-z)}
@@ -1024,22 +1024,22 @@ function viewHome(){
   return `
   <section class="hero">
     <div class="hero-bg">
-      <!-- Fondo abstracto ZOLER: obsidiana + destellos dorados -->
+      <!-- Fondo abstracto ZOLER: se adapta a modo claro u oscuro -->
       <svg width="100%" height="100%" preserveAspectRatio="xMaxYMid slice" viewBox="0 0 1000 800" xmlns="http://www.w3.org/2000/svg">
         <defs>
-          <radialGradient id="hg1" cx="75%" cy="35%" r="55%"><stop offset="0" stop-color="#C9A84C" stop-opacity=".08"/><stop offset="1" stop-color="#0D0D0D" stop-opacity="0"/></radialGradient>
-          <radialGradient id="hg2" cx="85%" cy="70%" r="40%"><stop offset="0" stop-color="#E8C97A" stop-opacity=".05"/><stop offset="1" stop-color="#0D0D0D" stop-opacity="0"/></radialGradient>
+          <radialGradient id="hg1" cx="75%" cy="35%" r="55%"><stop offset="0" stop-color="var(--gold-z)" stop-opacity=".12"/><stop offset="1" stop-color="var(--bg)" stop-opacity="0"/></radialGradient>
+          <radialGradient id="hg2" cx="85%" cy="70%" r="40%"><stop offset="0" stop-color="var(--gold-z-2)" stop-opacity=".08"/><stop offset="1" stop-color="var(--bg)" stop-opacity="0"/></radialGradient>
         </defs>
-        <rect width="1000" height="800" fill="#0D0D0D"/>
+        <rect width="1000" height="800" fill="var(--bg)"/>
         <rect width="1000" height="800" fill="url(#hg1)"/>
         <rect width="1000" height="800" fill="url(#hg2)"/>
         <!-- Z decorativa gigante -->
-        <text x="680" y="680" font-family="Georgia,serif" font-size="520" font-weight="bold" fill="#C9A84C" opacity=".03">Z</text>
+        <text x="680" y="680" font-family="Georgia,serif" font-size="520" font-weight="bold" fill="var(--gold-z)" opacity=".04">Z</text>
         <!-- Lineas finas decorativas -->
-        <line x1="550" y1="0" x2="1000" y2="800" stroke="#C9A84C" stroke-width=".4" opacity=".1"/>
-        <line x1="620" y1="0" x2="1000" y2="580" stroke="#C9A84C" stroke-width=".3" opacity=".06"/>
-        <circle cx="850" cy="180" r="120" fill="none" stroke="#C9A84C" stroke-width=".5" opacity=".1"/>
-        <circle cx="850" cy="180" r="200" fill="none" stroke="#C9A84C" stroke-width=".3" opacity=".05"/>
+        <line x1="550" y1="0" x2="1000" y2="800" stroke="var(--gold-z)" stroke-width=".4" opacity=".15"/>
+        <line x1="620" y1="0" x2="1000" y2="580" stroke="var(--gold-z)" stroke-width=".3" opacity=".1"/>
+        <circle cx="850" cy="180" r="120" fill="none" stroke="var(--gold-z)" stroke-width=".5" opacity=".15"/>
+        <circle cx="850" cy="180" r="200" fill="none" stroke="var(--gold-z)" stroke-width=".3" opacity=".08"/>
       </svg>
     </div>
     ${petals}
