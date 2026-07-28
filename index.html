@@ -1907,8 +1907,14 @@ async function subscribeNews(){
 </div></body></html>`;
   fetch('/api/send-email',{method:'POST',headers:{'Content-Type':'application/json'},
     body:JSON.stringify({to:v,subject:`★ Bienvenido a ${negName}`,html:welcomeHtml})
-  }).catch(()=>{});
-  if(el)el.value=''; toast('¡Listo! Revisa tu correo ✔','gold');
+  }).then(async r => {
+    const data = await r.json().catch(()=>({}));
+    if(!r.ok || !data.ok) toast('Error en correo: ' + (data.error || data.reason || 'Desconocido'), 'rose');
+    else toast('¡Listo! Revisa tu correo ✔', 'gold');
+  }).catch(e=>{
+    toast('Error local: estás probando fuera de Vercel', 'rose');
+  });
+  if(el)el.value='';
 }
 
 /* Aplica SEO y datos del negocio desde config.js */
