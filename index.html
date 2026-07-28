@@ -289,8 +289,12 @@ html[data-theme="dark"] .sum-row.total{color:var(--sage)}
 
 /* ---------- Inputs ---------- */
 input,select,textarea{font-family:var(--sans);font-weight:300;padding:.72rem 1rem;border-radius:var(--radius-sm);
-  border:1px solid rgba(201,168,76,.18);background:var(--obsidian-2);color:var(--ivory-z);font-size:.9rem;width:100%;transition:.25s}
-input:focus,select:focus,textarea:focus{border-color:var(--gold-z);outline:none;box-shadow:0 0 0 3px rgba(201,168,76,.1)}
+  border:1px solid rgba(201,168,76,.18);background:var(--obsidian-2);color:var(--text);font-size:.9rem;width:100%;transition:.25s}
+input:focus,select:focus,textarea:focus{border-color:var(--gold-z);outline:none;background:var(--obsidian-2);box-shadow:0 0 0 3px rgba(201,168,76,.1)}
+input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:focus, input:-webkit-autofill:active{
+  -webkit-box-shadow:0 0 0 30px var(--obsidian-2) inset !important;
+  -webkit-text-fill-color:var(--text) !important;
+}
 label.fld{display:block;font-size:.76rem;font-weight:500;letter-spacing:.08em;text-transform:uppercase;margin-bottom:.4rem;color:var(--muted-z)}
 .fgroup{margin-bottom:1rem}
 .frow{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
@@ -343,29 +347,29 @@ label.fld{display:block;font-size:.76rem;font-weight:500;letter-spacing:.08em;te
 
 /* ---------- Admin ZOLER ---------- */
 .admin-shell{display:grid;grid-template-columns:230px 1fr;min-height:100vh;padding-top:var(--header-h)}
-.admin-side{background:#080808;border-right:1px solid rgba(201,168,76,.15);padding:1.6rem 1rem;position:sticky;top:var(--header-h);height:calc(100vh - var(--header-h));overflow-y:auto}
+.admin-side{background:var(--surface);border-right:1px solid var(--line);padding:1.6rem 1rem;position:sticky;top:var(--header-h);height:calc(100vh - var(--header-h));overflow-y:auto}
 .admin-side .logo{font-family:var(--serif);font-size:1.6rem;color:var(--gold-z);margin-bottom:2rem;padding-left:.5rem;letter-spacing:.12em}
 .admin-side .logo small{display:block;font-size:.5rem;letter-spacing:.3em;color:var(--muted-z);font-family:var(--sans);margin-top:2px}
-.admin-side a{display:flex;align-items:center;gap:.7rem;padding:.7rem .9rem;border-radius:10px;font-size:.86rem;margin-bottom:.2rem;color:var(--muted-z);transition:.25s}
-.admin-side a:hover,.admin-side a.active{background:var(--gold-soft);color:var(--gold-z)}
-.admin-main{padding:2rem;overflow-x:auto;background:var(--obsidian)}
+.admin-side a{display:flex;align-items:center;gap:.7rem;padding:.7rem .9rem;border-radius:10px;font-size:.86rem;margin-bottom:.2rem;color:var(--text);opacity:.8;transition:.25s}
+.admin-side a:hover,.admin-side a.active{background:var(--gold-soft);color:var(--gold-z);opacity:1}
+.admin-main{padding:2rem;overflow-x:auto;background:var(--bg)}
 .admin-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.6rem;flex-wrap:wrap;gap:1rem}
 .admin-head h2{font-size:1.8rem;color:var(--gold-z);font-family:var(--serif);letter-spacing:.06em}
 .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.8rem}
-.kpi{background:var(--obsidian-2);border:1px solid rgba(201,168,76,.12);border-radius:var(--radius);padding:1.3rem}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:1.3rem}
 .kpi small{color:var(--muted-z);font-size:.7rem;text-transform:uppercase;letter-spacing:.14em}
 .kpi b{font-family:var(--serif);font-size:2rem;color:var(--gold-z);display:block;margin-top:.3rem}
-table{width:100%;border-collapse:collapse;background:var(--obsidian-2);border-radius:var(--radius);overflow:hidden;border:1px solid rgba(201,168,76,.12)}
-th,td{padding:.85rem 1rem;text-align:left;font-size:.84rem;border-bottom:1px solid rgba(201,168,76,.07);color:var(--ivory-z)}
-th{font-weight:500;text-transform:uppercase;font-size:.68rem;letter-spacing:.14em;color:var(--muted-z);background:var(--obsidian-3)}
+table{width:100%;border-collapse:collapse;background:var(--surface);border-radius:var(--radius);overflow:hidden;border:1px solid var(--line)}
+th,td{padding:.85rem 1rem;text-align:left;font-size:.84rem;border-bottom:1px solid var(--line);color:var(--text)}
+th{font-weight:500;text-transform:uppercase;font-size:.68rem;letter-spacing:.14em;color:var(--muted-z);background:var(--cream-2)}
 tr:last-child td{border-bottom:none}
 tr:hover td{background:var(--gold-soft)}
 .state{font-size:.68rem;padding:.28rem .65rem;border-radius:999px;font-weight:600;display:inline-block;letter-spacing:.06em}
 .state.pendiente{background:rgba(232,168,76,.15);color:var(--gold-z-2)} .state.confirmado{background:rgba(76,175,125,.12);color:#4caf7d}
 .state.preparando{background:rgba(138,130,200,.12);color:#9b8ee0} .state.encamino{background:rgba(76,130,210,.12);color:#5b9ef0}
 .state.entregado{background:rgba(76,175,125,.18);color:#5fc88a} .state.cancelado{background:rgba(232,92,92,.12);color:#e85c5c}
-.admin-login{min-height:100vh;display:grid;place-items:center;padding:20px;background:var(--obsidian)}
-.admin-login .box{background:var(--obsidian-2);border:1px solid rgba(201,168,76,.2);border-radius:var(--radius);padding:2.4rem;max-width:400px;width:100%;text-align:center;box-shadow:var(--shadow),var(--shadow-gold)}
+.admin-login{min-height:100vh;display:grid;place-items:center;padding:20px;background:var(--bg)}
+.admin-login .box{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:2.4rem;max-width:400px;width:100%;text-align:center;box-shadow:var(--shadow),var(--shadow-gold)}
 .stock-bar{height:5px;border-radius:3px;background:rgba(201,168,76,.1);overflow:hidden;margin-top:.4rem}
 .stock-bar i{display:block;height:100%;border-radius:3px;background:linear-gradient(90deg,var(--gold-z-3),var(--gold-z))}
 
@@ -1127,7 +1131,11 @@ function viewHome(){
 }
 
 function viewCatalog(catParam){
-  if(catParam){ currentFilters.cats=new Set([catParam]); }
+  if(catParam){
+    if(PRODUCTS.some(p=>p.cat===catParam)) currentFilters.cats=new Set([catParam]);
+    else if(PRODUCTS.some(p=>(p.occasions||[]).includes(catParam))) currentFilters.occ=new Set([catParam]);
+    else currentFilters.q=catParam;
+  }
   return `<div class="wrap block" style="padding-top:calc(var(--header-h) + 2.4rem)">
     <div class="sec-head"><div><span class="eyebrow">Catálogo</span><h2 id="catTitle">${catParam?esc(catParam):'Todas las flores'}</h2><p>Encuentra el detalle perfecto para cada momento.</p></div></div>
     <div class="shop">
