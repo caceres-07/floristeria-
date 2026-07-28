@@ -35,23 +35,22 @@
    Paleta: Obsidiana, Dorado Premium, Marfil
    Display: Playfair Display · UI/Body: Inter
    ============================================================ */
+/* Paleta base ZOLER */
 :root{
-  /* Paleta ZOLER: Obsidiana + Dorado */
   --obsidian:#0D0D0D; --obsidian-2:#1A1A1A; --obsidian-3:#242424;
-  --gold-z:#C9A84C; --gold-z-2:#E8C97A; --gold-z-3:#A07C2E; --gold-soft:#2A2315;
-  --ivory-z:#F5F0E8; --ivory-2:#EDE8DE;
-  --muted-z:#8A8070; --line-z:rgba(201,168,76,.18);
-  /* Mapeo a tokens semánticos */
+  --gold-z:#C9A84C; --gold-z-2:#E8C97A; --gold-z-3:#A07C2E; --gold-soft:rgba(201,168,76,.1);
+  --ivory-z:#F5F0E8; --ivory-2:#EDE8DE; --muted-z:#8A8070; --line-z:rgba(201,168,76,.18);
+  /* Tokens semánticos — modo oscuro (por defecto) */
   --bg:var(--obsidian); --surface:var(--obsidian-2); --text:var(--ivory-z);
-  --card:rgba(26,26,26,.92); --glass:rgba(20,20,20,.75);
-  --green:var(--gold-z); --green-2:var(--gold-z-2); --sage:var(--gold-z-3); --sage-soft:var(--gold-soft);
-  --rose:var(--gold-z-2); --rose-deep:var(--gold-z); --rose-soft:var(--gold-soft);
-  --gold:var(--gold-z); --gold-soft:var(--gold-soft);
+  --card:rgba(26,26,26,.95); --glass:rgba(13,13,13,.85);
+  --green:var(--gold-z); --green-2:var(--gold-z-2); --sage:var(--gold-z-3); --sage-soft:rgba(201,168,76,.1);
+  --rose:var(--gold-z-2); --rose-deep:var(--gold-z); --rose-soft:rgba(201,168,76,.08);
+  --gold:var(--gold-z); --gold-soft:rgba(201,168,76,.1);
   --cream:var(--obsidian); --cream-2:var(--obsidian-2); --ivory:var(--obsidian-2);
   --ink:var(--ivory-z); --muted:var(--muted-z); --line:var(--line-z);
   --shadow:0 20px 60px -20px rgba(0,0,0,.9),0 0 0 1px rgba(201,168,76,.08);
   --shadow-sm:0 8px 30px -12px rgba(0,0,0,.8);
-  --shadow-gold:0 0 40px -10px rgba(201,168,76,.25);
+  --shadow-gold:0 0 40px -10px rgba(201,168,76,.3);
   --radius:18px; --radius-sm:12px;
   --accent:var(--gold-z); --btn-text:#0D0D0D;
   --ok:#4caf7d; --warn:#e8a84c; --bad:#e85c5c;
@@ -59,21 +58,23 @@
   --serif:"Playfair Display",Georgia,serif;
   --sans:"Inter","Segoe UI",system-ui,-apple-system,sans-serif;
 }
-/* ZOLER modo claro — negro sobre marfil dorado */
+/* ZOLER modo claro: marfil/dorado, tarjetas blancas */
 html[data-theme="light"]{
-  --bg:#F7F3EC; --surface:#FFFFFF; --text:#1A1A1A;
-  --card:#FFFFFF; --glass:rgba(247,243,236,.95);
-  --obsidian:#1A1A1A; --obsidian-2:#FFFFFF; --obsidian-3:#F7F3EC;
-  --ink:#1A1A1A; --muted:#6B6050; --muted-z:#6B6050;
-  --line:rgba(201,168,76,.2); --line-z:rgba(201,168,76,.2);
-  --shadow:0 8px 40px -16px rgba(0,0,0,.15);
-  --shadow-sm:0 4px 20px -8px rgba(0,0,0,.1);
+  --bg:#F5EFE0; --surface:#FFFFFF; --text:#1A1508;
+  --card:#FFFFFF; --glass:rgba(245,239,224,.97);
+  --obsidian:#1A1508; --obsidian-2:#FFFFFF; --obsidian-3:#F0E8D0;
+  --ink:#1A1508; --muted:#6B5F45; --muted-z:#6B5F45;
+  --line:rgba(160,124,46,.2); --line-z:rgba(160,124,46,.2);
+  --shadow:0 8px 40px -12px rgba(26,21,8,.18);
+  --shadow-sm:0 4px 20px -8px rgba(26,21,8,.12);
   --shadow-gold:0 0 30px -10px rgba(201,168,76,.2);
-  --ivory-z:#1A1A1A; --ivory-2:#2A2015;
-  --gold-soft:#FBF5E6;
-  --sage-soft:#FBF5E6;
-  --rose-soft:#FBF5E6;
-  --cream:#F7F3EC; --cream-2:#EFE9DC; --ivory:#FFFFFF;
+  --ivory-z:#1A1508; --ivory-2:#2A2015;
+  --gold-soft:rgba(201,168,76,.12);
+  --sage-soft:rgba(201,168,76,.1);
+  --rose-soft:rgba(201,168,76,.08);
+  --cream:#F5EFE0; --cream-2:#EDE3C8; --ivory:#FFFFFF;
+  --green:var(--gold-z-3); --rose-deep:var(--gold-z-3);
+  --sage:var(--gold-z-3);
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
@@ -978,7 +979,7 @@ function closeCart(){$('#cartDrawer').classList.remove('open');$('#overlay').cla
    ============================================================ */
 function productCard(p){
   const disc = p.old ? Math.round((1-p.price/p.old)*100) : 0;
-  return `<article class="card">
+  return `<article class="card reveal">
     <div class="thumb">
       <div class="tags">
         ${p.old?`<span class="chip sale">−${disc}%</span>`:''}
@@ -1014,68 +1015,86 @@ function viewHome(){
   const best=PRODUCTS.filter(p=>p.best).slice(0,4);
   const offers=PRODUCTS.filter(p=>p.old).slice(0,4);
   const news=PRODUCTS.filter(p=>p.isNew).slice(0,4);
-  const petals=Array.from({length:9}).map((_,i)=>`<svg class="petal" style="left:${8+i*10}%;width:${14+i%3*8}px;animation-duration:${10+i*1.5}s;animation-delay:${i*1.2}s" viewBox="0 0 20 30"><ellipse cx="10" cy="15" rx="7" ry="14" fill="${i%2?'var(--rose)':'var(--rose-deep)'}" opacity=".5"/></svg>`).join('');
+  // Petalos ZOLER: solo dorado, sin colores del branding antiguo
+  const petals=Array.from({length:8}).map((_,i)=>{
+    const size=12+i%3*10;
+    const opacity=0.06+i*0.025;
+    return `<svg class="petal" style="left:${6+i*12}%;width:${size}px;animation-duration:${14+i*2}s;animation-delay:${i*1.8}s" viewBox="0 0 20 30"><ellipse cx="10" cy="15" rx="7" ry="14" fill="#C9A84C" opacity="${opacity}"/></svg>`;
+  }).join('');
   return `
   <section class="hero">
     <div class="hero-bg">
-      <svg width="100%" height="100%" preserveAspectRatio="xMaxYMid slice" viewBox="0 0 1000 800">
-        <defs><radialGradient id="hg" cx="72%" cy="42%" r="60%"><stop offset="0" stop-color="var(--rose-soft)"/><stop offset="1" stop-color="var(--bg)"/></radialGradient></defs>
-        <rect width="1000" height="800" fill="url(#hg)"/>
-        ${Array.from({length:5}).map((_,r)=>Array.from({length:4}).map((_,c)=>{const cx=560+c*110,cy=180+r*130,h=['#C97D84','#E7BFC2','#C6A15B','#8AA893'][(r+c)%4];return `<g opacity="${.55+((r+c)%3)*.15}"><circle cx="${cx}" cy="${cy}" r="7" fill="var(--gold)"/>${Array.from({length:8}).map((__,i)=>`<ellipse cx="${cx}" cy="${cy-20}" rx="9" ry="20" fill="${h}" transform="rotate(${i*45} ${cx} ${cy})"/>`).join('')}</g>`;}).join('')).join('')}
+      <!-- Fondo abstracto ZOLER: obsidiana + destellos dorados -->
+      <svg width="100%" height="100%" preserveAspectRatio="xMaxYMid slice" viewBox="0 0 1000 800" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="hg1" cx="75%" cy="35%" r="55%"><stop offset="0" stop-color="#C9A84C" stop-opacity=".08"/><stop offset="1" stop-color="#0D0D0D" stop-opacity="0"/></radialGradient>
+          <radialGradient id="hg2" cx="85%" cy="70%" r="40%"><stop offset="0" stop-color="#E8C97A" stop-opacity=".05"/><stop offset="1" stop-color="#0D0D0D" stop-opacity="0"/></radialGradient>
+        </defs>
+        <rect width="1000" height="800" fill="#0D0D0D"/>
+        <rect width="1000" height="800" fill="url(#hg1)"/>
+        <rect width="1000" height="800" fill="url(#hg2)"/>
+        <!-- Z decorativa gigante -->
+        <text x="680" y="680" font-family="Georgia,serif" font-size="520" font-weight="bold" fill="#C9A84C" opacity=".03">Z</text>
+        <!-- Lineas finas decorativas -->
+        <line x1="550" y1="0" x2="1000" y2="800" stroke="#C9A84C" stroke-width=".4" opacity=".1"/>
+        <line x1="620" y1="0" x2="1000" y2="580" stroke="#C9A84C" stroke-width=".3" opacity=".06"/>
+        <circle cx="850" cy="180" r="120" fill="none" stroke="#C9A84C" stroke-width=".5" opacity=".1"/>
+        <circle cx="850" cy="180" r="200" fill="none" stroke="#C9A84C" stroke-width=".3" opacity=".05"/>
       </svg>
     </div>
     ${petals}
     <div class="wrap"><div class="hero-inner">
-      <span class="eyebrow">Floristería de autor</span>
-      <h1>Cada flor cuenta<br>una <em>historia.</em></h1>
-      <p class="lede">Sorprende a quien más quieres con un hermoso detalle. Ramos y arreglos hechos a mano, con flor fresca y entrega el mismo día.</p>
+      <div class="hero-badge">✦ Diseñado para Sorprender</div>
+      <h1>Flores que<br>hablan por<br>ti. <em>Siempre.</em></h1>
+      <p class="lede">Arreglos de autor para los momentos que importan. Envíos express a todo Colombia, el mismo día que ordenas.</p>
       <div class="hero-cta">
         <a href="#/catalogo" class="btn btn-primary">Comprar ahora →</a>
-        <a href="#/catalogo/Ramos Premium" class="btn btn-ghost">Ver ramos premium</a>
+        <a href="#/catalogo/Ramos Premium" class="btn btn-ghost">Ramos premium</a>
       </div>
+      <div class="hero-line"></div>
       <div class="hero-stats">
-        <div><span id="stat1">+3.500</span><small>Detalles entregados</small></div>
-        <div><span id="stat2">4.9★</span><small>Calificación media</small></div>
-        <div><span id="stat3">Mismo día</span><small>Envío express</small></div>
+        <div><span id="stat1">+3.500</span><small>Pedidos felices</small></div>
+        <div><span id="stat2">4.9★</span><small>Calificación</small></div>
+        <div><span id="stat3">Express</span><small>Envío mismo día</small></div>
       </div>
     </div></div>
   </section>
 
-  <section class="block"><div class="wrap">
-    <div class="sec-head"><div><span class="eyebrow">Selección de la casa</span><h2>Productos destacados</h2><p>Los favoritos de nuestro maestro florista esta temporada.</p></div><a href="#/catalogo" class="btn btn-ghost btn-sm">Ver todo</a></div>
+  <section class="block" style="background:var(--bg)"><div class="wrap">
+    <div class="sec-head"><div><span class="eyebrow">Selección de la casa</span><h2>Productos destacados</h2><p>Los favoritos de la temporada.</p></div><a href="#/catalogo" class="btn btn-ghost btn-sm">Ver todo</a></div>
     <div class="grid cols4">${featured.map(productCard).join('')}</div>
   </div></section>
 
-  <section class="block" style="background:var(--cream-2)"><div class="wrap">
+  <section class="block" style="background:var(--obsidian-2)"><div class="wrap">
     <div class="sec-head"><div><span class="eyebrow">Explora</span><h2>Categorías principales</h2></div></div>
-    <div class="cat-grid">${CATEGORIES.map(c=>`<a href="#/catalogo/${encodeURIComponent(c.name)}" class="cat"><span class="emoji">${c.emoji}</span><span class="name">${c.name}</span><small>${PRODUCTS.filter(p=>p.cat===c.name||(p.occasions||[]).includes(c.name)||(p.tags||[]).includes(c.name)).length} productos</small></a>`).join('')}</div>
+    <div class="cat-grid">${CATEGORIES.map(c=>`<a href="#/catalogo/${encodeURIComponent(c.name)}" class="cat reveal-scale"><span class="emoji">${c.emoji}</span><span class="name">${c.name}</span><small>${PRODUCTS.filter(p=>p.cat===c.name||(p.occasions||[]).includes(c.name)||(p.tags||[]).includes(c.name)).length} productos</small></a>`).join('')}</div>
   </div></section>
 
-  <section class="block"><div class="wrap">
+  <section class="block" style="background:var(--bg)"><div class="wrap">
     <div class="sec-head"><div><span class="eyebrow">Los que vuelan</span><h2>Ramos más vendidos</h2></div><a href="#/catalogo" class="btn btn-ghost btn-sm">Ver todo</a></div>
     <div class="grid cols4">${best.map(productCard).join('')}</div>
   </div></section>
 
-  ${offers.length?`<section class="block" style="background:linear-gradient(180deg,var(--rose-soft),var(--bg))"><div class="wrap">
+  ${offers.length?`<section class="block" style="background:linear-gradient(180deg,rgba(201,168,76,.08),var(--bg))"><div class="wrap">
     <div class="sec-head"><div><span class="eyebrow">Por tiempo limitado</span><h2>Productos en oferta</h2><p>Belleza a precio irresistible.</p></div></div>
     <div class="grid cols4">${offers.map(productCard).join('')}</div>
   </div></section>`:''}
 
-  <section class="block"><div class="wrap">
+  <section class="block" style="background:var(--obsidian-2)"><div class="wrap">
     <div class="sec-head"><div><span class="eyebrow">Recién llegados</span><h2>Nuevos ingresos</h2></div><a href="#/catalogo" class="btn btn-ghost btn-sm">Ver todo</a></div>
     <div class="grid cols4">${news.map(productCard).join('')}</div>
   </div></section>
 
-  <section class="block" style="background:var(--cream-2)"><div class="wrap">
+  <section class="block" style="background:var(--bg)"><div class="wrap">
     <div class="sec-head center" style="justify-content:center"><div><span class="eyebrow">Lo que dicen</span><h2>Opiniones de clientes</h2></div></div>
     <div class="testi-grid">
-      ${[['Valentina R.','Cliente frecuente','Pedí el Ramo Elegancia Roja para mi aniversario y llegó impecable, puntual y aún más lindo que en la foto. Repetiré sin duda.','V'],['Andrés M.','Cliente frecuente','El servicio al cliente por WhatsApp fue rapidísimo y me ayudaron a elegir. Mi mamá quedó feliz con los girasoles.','A'],['Carolina T.','Novia feliz','Las flores del matrimonio superaron todas mis expectativas. Elegancia pura. Gracias, ZOLER.','C']].map(t=>`<div class="testi reveal"><span class="q">“</span><p>${t[2]}</p><div class="who"><div class="ava">${t[3]}</div><div><b>${t[0]}</b><small>${t[1]}</small></div></div>${starsHtml(5)}</div>`).join('')}
+      ${[['Valentina R.','Cliente frecuente','Pedí mi ramo para el aniversario y llegó impecable, puntual y aún más lindo que en la foto. ZOLER es de otro nivel.','V'],['Andrés M.','Cliente frecuente','El servicio por WhatsApp fue increíble, rápido y me ayudaron a escoger. Mi mamá quedó feliz.','A'],['Carolina T.','Novia feliz','Las flores de mi matrimonio superaron todo. Elegancia pura. 100% recomendados.','C']].map((t,i)=>`<div class="testi reveal" style="transition-delay:${i*.12}s"><span class="q">“</span><p>${t[2]}</p><div class="who"><div class="ava">${t[3]}</div><div><b>${t[0]}</b><small>${t[1]}</small></div></div>${starsHtml(5)}</div>`).join('')}
     </div>
   </div></section>
 
-  <section class="block"><div class="wrap">
+  <section class="block" style="background:var(--obsidian-2)"><div class="wrap">
     <div class="sec-head"><div><span class="eyebrow">Nuestro trabajo</span><h2>Galería</h2></div></div>
-    <div class="gallery">${['#C97D84','#8AA893','#C6A15B','#E7BFC2','#7a9a82','#d99f78'].map((h,i)=>{const fp={id:'g'+i,cantidad:12,hue:h,name:'Arreglo'};return `<div class="g">${flowerSVG(fp)}</div>`;}).join('')}</div>
+    <div class="gallery">${['#C9A84C','#E8C97A','#A07C2E','#8B6D3F','#D4B060','#C9A84C'].map((h,i)=>{const fp={id:'g'+i,cantidad:12,hue:h,name:'Arreglo'};return `<div class="g">${flowerSVG(fp)}</div>`;}).join('')}</div>
   </div></section>
 
   <section class="block" id="contacto"><div class="wrap">
@@ -1859,7 +1878,29 @@ async function subscribeNews(){
   const el=$('#newsEmail'); const v=(el&&el.value||'').trim();
   if(!/^[^@]+@[^@]+\.[^@]+$/.test(v)){toast('Escribe un correo válido','rose');return;}
   try{ await DB.subscribe(v); }catch(e){ console.warn('Newsletter error:',e); }
-  if(el)el.value=''; toast('¡Listo! Te avisaremos de nuestras promociones 🌷','gold');
+  // Enviar email de bienvenida al suscriptor
+  const negName=N.nombre||'ZOLER';
+  const welcomeHtml=`<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:24px;background:#0D0D0D;font-family:'Segoe UI',Arial,sans-serif">
+<div style="max-width:500px;margin:0 auto;background:#1A1A1A;border-radius:18px;overflow:hidden;border:1px solid rgba(201,168,76,.2)">
+  <div style="background:#0D0D0D;padding:28px;text-align:center;border-bottom:1px solid rgba(201,168,76,.12)">
+    <span style="font-family:Georgia,serif;font-size:48px;font-weight:bold;color:#C9A84C">Z</span>
+    <h1 style="color:#C9A84C;margin:6px 0 0;font-size:22px;letter-spacing:.2em;font-family:Georgia,serif">${negName}</h1>
+    <p style="color:#8A8070;margin:4px 0 0;font-size:11px;letter-spacing:.2em;text-transform:uppercase">DISEÑADO PARA SORPRENDER</p>
+  </div>
+  <div style="padding:28px;text-align:center">
+    <h2 style="color:#F5F0E8;font-family:Georgia,serif;font-size:20px;margin:0 0 12px">Bienvenido a nuestra lista ⭐</h2>
+    <p style="color:#8A8070;font-size:14px;line-height:1.7;margin:0 0 20px">Estarás entre los primeros en enterarte de nuevas colecciones, descuentos exclusivos y arreglos especiales.</p>
+    <a href="${N.urlSitio||'https://zoler.co'}" style="background:#C9A84C;color:#0D0D0D;padding:12px 28px;border-radius:999px;text-decoration:none;font-weight:700;font-size:14px;display:inline-block">Ver catálogo →</a>
+  </div>
+  <div style="background:#0D0D0D;padding:16px;text-align:center;border-top:1px solid rgba(201,168,76,.1)">
+    <p style="color:#4A4035;font-size:11px;margin:0;letter-spacing:.12em">${negName} — DISEÑADO PARA SORPRENDER</p>
+  </div>
+</div></body></html>`;
+  fetch('/api/send-email',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({to:v,subject:`★ Bienvenido a ${negName}`,html:welcomeHtml})
+  }).catch(()=>{});
+  if(el)el.value=''; toast('¡Listo! Revisa tu correo ✔','gold');
 }
 
 /* Aplica SEO y datos del negocio desde config.js */
