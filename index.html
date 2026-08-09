@@ -850,7 +850,7 @@ let PRODUCTS = [];
 let cart = [];
 let favs = [];
 let appliedCoupon = null;
-let currentFilters = {q:'',cats:new Set(),colors:new Set(),occ:new Set(),size:new Set(),avail:false,sort:'destacados',max:500000};
+let currentFilters = {q:'',cats:new Set(),colors:new Set(),occ:new Set(),size:new Set(),avail:false,sort:'destacados',max:2000000};
 const N = CFG.negocio||{};
 const CONTACT = {phone:(N.whatsapp||'573044029343'), display:(N.telefonoVisible||'+57 304 402 9343'),
   email:(N.correo||'hola@zoler.co'), addr:'', city:'',
@@ -1173,14 +1173,14 @@ function renderFilters(){
     <div class="fgrp"><div class="ttl">Color</div><div class="swatches">${Object.keys(COLORS).map(c=>`<span class="sw ${currentFilters.colors.has(c)?'on':''}" title="${c}" style="background:${COLORS[c]}" onclick="toggleFilter('colors','${c}',this)"></span>`).join('')}</div></div>
     <div class="fgrp"><div class="ttl">Ocasión</div>${OCCASIONS.map(o=>`<label class="check"><input type="checkbox" ${currentFilters.occ.has(o)?'checked':''} onchange="toggleFilter('occ','${o}')"> ${o}</label>`).join('')}</div>
     <div class="fgrp"><div class="ttl">Tamaño</div>${['Mediano','Grande','XL','XXL','Caja','Maceta'].map(s=>`<label class="check"><input type="checkbox" ${currentFilters.size.has(s)?'checked':''} onchange="toggleFilter('size','${s}')"> ${s}</label>`).join('')}</div>
-    <div class="fgrp"><div class="ttl">Precio máximo: <b id="pxLbl">${money(currentFilters.max)}</b></div><input type="range" min="80000" max="500000" step="10000" value="${currentFilters.max}" oninput="setMaxPrice(this.value)"></div>
+    <div class="fgrp"><div class="ttl">Precio máximo: <b id="pxLbl">${money(currentFilters.max)}</b></div><input type="range" min="50000" max="2000000" step="50000" value="${currentFilters.max}" oninput="setMaxPrice(this.value)"></div>
     <div class="fgrp"><label class="check"><input type="checkbox" ${currentFilters.avail?'checked':''} onchange="setAvailOnly(this.checked)"> Solo disponibles</label></div>
     <button class="btn btn-ghost btn-sm btn-block" onclick="resetFilters()">Limpiar filtros</button>`;
 }
 function toggleFilter(k,v,el){ const s=currentFilters[k]; s.has(v)?s.delete(v):s.add(v); if(el && k==='colors') el.classList.toggle('on'); renderResults(); }
 function setMaxPrice(v){ currentFilters.max=+v; const l=$('#pxLbl'); if(l)l.textContent=money(+v); renderResults(); }
 function setAvailOnly(c){ currentFilters.avail=!!c; renderResults(); }
-function resetFilters(){ currentFilters={q:'',cats:new Set(),colors:new Set(),occ:new Set(),size:new Set(),avail:false,sort:currentFilters.sort,max:500000}; renderFilters(); renderResults(); $('#searchIn').value=''; }
+function resetFilters(){ currentFilters={q:'',cats:new Set(),colors:new Set(),occ:new Set(),size:new Set(),avail:false,sort:currentFilters.sort,max:2000000}; renderFilters(); renderResults(); $('#searchIn').value=''; }
 /* Toggle del panel de filtros en móvil */
 function toggleFilters(){
   const f=$('#filters'), b=$('#filterToggle');
