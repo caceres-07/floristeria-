@@ -1163,7 +1163,7 @@ function viewCatalog(catParam){
   </div>`;
 }
 function renderFilters(){
-  const cats=[...new Set(PRODUCTS.map(p=>p.cat))];
+  const cats=CATEGORIES.map(c=>c.name);
   $('#filters').innerHTML=`
     <h4>Filtros</h4><p style="font-size:.82rem;color:var(--muted);margin-bottom:.4rem">Refina tu búsqueda</p>
     <div class="fgrp"><div class="ttl">Categoría</div>${cats.map(c=>`<label class="check"><input type="checkbox" value="${esc(c)}" ${currentFilters.cats.has(c)?'checked':''} onchange="toggleFilter('cats',this.value)"> ${esc(c)}</label>`).join('')}</div>
