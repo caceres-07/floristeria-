@@ -586,7 +586,7 @@ input,select,textarea{touch-action:manipulation}
     <div class="cols">
       <div>
         <h4 id="fBrand" style="font-family:var(--serif);font-size:1.8rem;letter-spacing:.18em">ZOLER</h4>
-        <p style="color:#4A4035;font-size:.88rem;max-width:260px;line-height:1.7;margin-top:.4rem">Diseñado para Sorprender. Flores y arreglos de autor con entrega el mismo día en Bogotá.</p>
+        <p style="color:#4A4035;font-size:.88rem;max-width:260px;line-height:1.7;margin-top:.4rem">Diseñado para Sorprender. Flores y arreglos de autor con envío a toda Colombia.</p>
         <div class="newsletter" style="margin-top:1rem">
           <input id="newsEmail" type="email" placeholder="Tu correo para novedades" />
           <button class="btn btn-gold btn-sm" onclick="subscribeNews()">Suscribir</button>
@@ -853,7 +853,7 @@ let appliedCoupon = null;
 let currentFilters = {q:'',cats:new Set(),colors:new Set(),occ:new Set(),size:new Set(),avail:false,sort:'destacados',max:500000};
 const N = CFG.negocio||{};
 const CONTACT = {phone:(N.whatsapp||'573044029343'), display:(N.telefonoVisible||'+57 304 402 9343'),
-  email:(N.correo||'hola@floryalma.co'), addr:(N.direccion||'Cra. 13 #85-32, Chapinero'), city:(N.ciudad||'Bogotá'),
+  email:(N.correo||'hola@zoler.co'), addr:'', city:'',
   ig:(N.instagram||'#'), fb:(N.facebook||'#'), tk:(N.tiktok||'#'),
   hours:['Lun – Vie: 8:00 a. m. – 7:00 p. m.','Sábado: 9:00 a. m. – 6:00 p. m.','Domingo: 10:00 a. m. – 2:00 p. m.']};
 
@@ -1741,7 +1741,7 @@ function editProduct(id){
     <div class="frow"><div class="fgroup"><label class="fld">Nombre</label><input id="e_name" value="${esc(p.name)}"></div><div class="fgroup"><label class="fld">Categoría</label><select id="e_cat">${CATEGORIES.map(c=>`<option ${c.name===p.cat?'selected':''}>${c.name}</option>`).join('')}</select></div></div>
     <div class="frow"><div class="fgroup"><label class="fld">Precio</label><input id="e_price" type="number" value="${p.price}"></div><div class="fgroup"><label class="fld">Precio anterior (opcional)</label><input id="e_old" type="number" value="${p.old||''}"></div></div>
     <div class="frow"><div class="fgroup"><label class="fld">Stock</label><input id="e_stock" type="number" value="${p.stock}"></div><div class="fgroup"><label class="fld">Color</label><select id="e_color">${Object.keys(COLORS).map(c=>`<option ${c===p.color?'selected':''}>${c}</option>`).join('')}</select></div></div>
-    <div class="frow"><div class="fgroup"><label class="fld">Tipo de flores</label><input id="e_flor" value="${esc(p.flor)}"></div><div class="fgroup"><label class="fld">Cantidad de flores</label><input id="e_cant" type="number" value="${p.cantidad}"></div></div>
+    <div class="frow"><div class="fgroup"><label class="fld">Tipo de flores</label><select id="e_flor"><option value="">Seleccionar...</option>${['Rosas rojas premium','Rosas rosadas','Rosas blancas','Rosas preservadas','Rosas y eucalipto','Rosas rosadas y peonías','Rosas rosadas y ranúnculos','Rosas, claveles y hortensias','Rosas y lisianthus blancos','Rosas, hortensias y orquídeas','Girasoles','Tulipanes importados','Gerberas, lisianthus y astromelia','Orquídea Phalaenopsis','Hortensias','Claveles','Lirios','Margaritas','Astromelias','Mix variado'].map(f=>`<option ${f===p.flor?'selected':''}>${f}</option>`).join('')}</select></div><div class="fgroup"><label class="fld">Cantidad de flores</label><input id="e_cant" type="number" value="${p.cantidad}"></div></div>
     <div class="frow"><div class="fgroup"><label class="fld">Tamaño</label><select id="e_size">${['Mediano','Grande','XL','XXL','Caja','Maceta'].map(s=>`<option ${s===p.size?'selected':''}>${s}</option>`).join('')}</select></div><div class="fgroup"><label class="fld">Color visual (hex)</label><input id="e_hue" value="${p.hue||'#C97D84'}"></div></div>
     <div class="fgroup">
       <label class="fld">Imagen del producto</label>
@@ -1974,8 +1974,8 @@ async function subscribeNews(){
 
 /* Aplica SEO y datos del negocio desde config.js */
 function applySEO(){
-  const nombre=N.nombre||'Flor & Alma', ciudad=N.ciudad||'Bogotá', url=N.urlSitio||location.origin;
-  document.title=`${nombre} — Floristería en ${ciudad} | Flores y ramos a domicilio`;
+  const nombre=N.nombre||'ZOLER', url=N.urlSitio||location.origin;
+  document.title=`${nombre} — Diseñado para Sorprender`;
   const cn=$('#canonical'); if(cn) cn.href=url;
   // Actualizar og:url y og:image dinámicamente según el dominio configurado
   ['og:url','og:image'].forEach(prop=>{
