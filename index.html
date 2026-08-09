@@ -176,8 +176,9 @@ section.block{padding:5.2rem 0}
   display:flex;flex-direction:column;transition:.45s cubic-bezier(.2,.7,.3,1);position:relative}
 .card:hover{transform:translateY(-8px);box-shadow:var(--shadow),var(--shadow-gold);border-color:rgba(201,168,76,.35)}
 .card .thumb{position:relative;aspect-ratio:4/5;overflow:hidden;background:var(--obsidian-3)}
-.card .thumb img,.card .thumb svg{width:100%;height:100%;object-fit:cover;transition:transform .7s ease}
+.card .thumb img,.card .thumb svg{width:100%;height:100%;object-fit:cover;display:block;transition:transform .7s ease}
 .card:hover .thumb img,.card:hover .thumb svg{transform:scale(1.06)}
+.pd .gallery-main img{width:100%;height:100%;object-fit:cover;display:block}
 .card .tags{position:absolute;top:12px;left:12px;display:flex;flex-direction:column;gap:6px;z-index:2}
 .chip{font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;font-weight:600;padding:.3rem .65rem;border-radius:999px;backdrop-filter:blur(10px)}
 .chip.sale{background:rgba(232,92,92,.9);color:#fff}
@@ -524,6 +525,10 @@ input,select,textarea{touch-action:manipulation}
   .sec-head h2{font-size:clamp(1.6rem,6vw,2rem)}
   h2{word-break:break-word;overflow-wrap:break-word}
 }
+@media(max-width:820px){
+  .checkout-grid{grid-template-columns:1fr !important}
+  .order-sticky{position:static !important}
+}
 </style>
 </head>
 <body>
@@ -602,7 +607,7 @@ input,select,textarea{touch-action:manipulation}
           <li><a href="#/faq">Preguntas frecuentes</a></li>
           <li><a href="#/blog">Blog &amp; consejos</a></li>
           <li><a id="fWa" href="#" target="_blank" rel="noopener">Escríbenos por WhatsApp</a></li>
-          <li><a href="#/#contacto">Contacto</a></li>
+          <li><a href="#/contacto">Contacto</a></li>
         </ul>
       </div>
       <div>
@@ -882,7 +887,7 @@ function flowerSVG(p, big){
   </svg>`;
 }
 function productMedia(p, cls, big){
-  if(p.img && /^https?:\/\//.test(p.img)) return `<img class="${cls||''}" src="${esc(p.img)}" alt="${esc(p.name)}" loading="lazy" onerror="this.outerHTML=window.__flw('${p.id}')">`;
+  if(p.img && (/^https?:\/\//.test(p.img) || /^data:image/.test(p.img))) return `<img class="${cls||''}" src="${esc(p.img)}" alt="${esc(p.name)}" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block" onerror="this.outerHTML=window.__flw('${p.id}')">`;
   return flowerSVG(p, big);
 }
 window.__flw = id => { const p = PRODUCTS.find(x=>x.id===id); return p?flowerSVG(p):''; };
@@ -1280,7 +1285,7 @@ async function submitReview(id){
   $('#revText').value=''; renderReviews(id);
   toast('¡Gracias por tu opinión! 🌟','gold');
 }
-function zoomImg(id){const p=PRODUCTS.find(x=>x.id===id);openModal(`<div style="padding:0">${flowerSVG(p,true)}</div>`);}
+function zoomImg(id){const p=PRODUCTS.find(x=>x.id===id);openModal(`<div style="padding:0">${productMedia(p,'',true)}</div>`);}
 
 function viewWishlist(){
   const list=PRODUCTS.filter(p=>favs.includes(p.id));
@@ -1293,32 +1298,58 @@ function viewWishlist(){
 function viewCheckout(){
   if(!cart.length) return `<div class="wrap block" style="padding-top:120px"><div class="empty"><span class="em">🛒</span>Tu carrito está vacío.<br><br><a href="#/catalogo" class="btn btn-primary btn-sm">Ir al catálogo</a></div></div>`;
   const t=cartTotals();
-  return `<div style="background:#0D0D0D;min-height:100vh;padding-top:calc(var(--header-h) + 2rem);padding-bottom:4rem;color:#F5F0E8">
+  const today=new Date().toISOString().split('T')[0];
+  const pm=CFG.pagoManual||{};
+  const bc=pm.bancolombia||{};
+  return `<div style="background:var(--bg);min-height:100vh;padding-top:calc(var(--header-h) + 2rem);padding-bottom:4rem;color:var(--text)">
   <div class="wrap">
-    <div class="sec-head" style="margin-bottom:1.6rem"><div><span class="eyebrow" style="color:#C9A84C">Casi listo</span><h2 style="font-size:2.2rem;font-family:Georgia,serif">Finalizar compra</h2></div></div>
+    <div class="sec-head" style="margin-bottom:1.6rem"><div><span class="eyebrow">Casi listo</span><h2 style="font-size:2.2rem;font-family:var(--serif)">Finalizar compra</h2></div></div>
     <div class="checkout-grid" style="display:grid;grid-template-columns:1fr 400px;gap:2.4rem;align-items:start">
       <div class="checkout-form">
-        <div class="info-card" style="background:#1A1A1A;border:1px solid #2A2315">
-          <h4 style="font-size:1.1rem;margin-bottom:1.4rem;color:#C9A84C">Información de Entrega</h4>
-          <div class="f-group"><label>Nombre completo</label><input id="f_name" placeholder="Tu nombre"></div>
-          <div class="f-group"><label>Teléfono</label><input id="f_phone" placeholder="300 000 0000"></div>
-          <div class="f-group"><label>Correo</label><input id="f_email" type="email" placeholder="email@ejemplo.com"></div>
-          <div class="f-group"><label>Dirección</label><input id="f_addr" placeholder="Calle, Carrera, Barrio"></div>
-          <div class="f-row" style="display:flex;gap:1rem">
-             <div class="f-group" style="flex:1"><label>Ciudad</label><input id="f_city" placeholder="Ciudad"></div>
-             <div class="f-group" style="flex:1"><label>Fecha</label><input id="f_date" type="date"></div>
+        <div class="info-card" style="background:var(--surface);border:1px solid var(--line)">
+          <h4 style="font-size:1.1rem;margin-bottom:1.4rem;color:var(--gold-z)">Información de Entrega</h4>
+          <div class="fgroup"><label class="fld">Nombre completo *</label><input id="f_name" placeholder="Tu nombre completo"></div>
+          <div class="frow"><div class="fgroup"><label class="fld">Teléfono *</label><input id="f_phone" type="tel" placeholder="300 000 0000"></div><div class="fgroup"><label class="fld">Correo *</label><input id="f_email" type="email" placeholder="email@ejemplo.com"></div></div>
+          <div class="fgroup"><label class="fld">Dirección de entrega *</label><input id="f_addr" placeholder="Calle, Carrera, número"></div>
+          <div class="frow"><div class="fgroup"><label class="fld">Ciudad *</label><input id="f_city" placeholder="Ciudad"></div><div class="fgroup"><label class="fld">Barrio</label><input id="f_hood" placeholder="Barrio o localidad"></div></div>
+          <div class="frow"><div class="fgroup"><label class="fld">Fecha de entrega *</label><input id="f_date" type="date" min="${today}"></div><div class="fgroup"><label class="fld">Hora preferida</label><select id="f_time"><option value="">Cualquier hora</option><option>Mañana (8am-12pm)</option><option>Tarde (12pm-5pm)</option><option>Noche (5pm-8pm)</option></select></div></div>
+          <div class="fgroup"><label class="fld">¿Quién recibe? (si es diferente a ti)</label><input id="f_recv" placeholder="Nombre de quien recibe"></div>
+          <div class="fgroup"><label class="fld">Mensaje para la tarjeta 💌</label><textarea id="f_card" rows="2" placeholder="Escribe un mensaje especial para quien recibe..."></textarea></div>
+          <div class="fgroup"><label class="fld">Notas adicionales</label><textarea id="f_notes" rows="2" placeholder="Instrucciones de entrega, piso, portería..."></textarea></div>
+        </div>
+        <div class="info-card" style="background:var(--surface);border:1px solid var(--line);margin-top:1.4rem">
+          <h4 style="font-size:1.1rem;margin-bottom:1rem;color:var(--gold-z)">Método de Pago</h4>
+          <div style="display:grid;gap:.7rem">
+            <label class="pay-method-btn selected" id="pm_nequi" onclick="selectPay('Nequi')" style="display:flex;align-items:center;gap:1rem;padding:1rem 1.2rem;border-radius:var(--radius-sm);border:2px solid var(--gold-z);background:var(--gold-soft);cursor:pointer;transition:.3s">
+              <input type="radio" name="pay" value="Nequi" checked style="display:none">
+              <span style="font-size:1.6rem">📲</span>
+              <div><b style="font-size:.95rem">Nequi</b><br><small style="color:var(--muted-z);font-size:.78rem">Transferencia al ${pm.nequi||'—'}</small></div>
+            </label>
+            <label class="pay-method-btn" id="pm_bancolombia" onclick="selectPay('Bancolombia')" style="display:flex;align-items:center;gap:1rem;padding:1rem 1.2rem;border-radius:var(--radius-sm);border:2px solid var(--line);background:transparent;cursor:pointer;transition:.3s">
+              <input type="radio" name="pay" value="Bancolombia" style="display:none">
+              <span style="font-size:1.6rem">🏦</span>
+              <div><b style="font-size:.95rem">Bancolombia</b><br><small style="color:var(--muted-z);font-size:.78rem">Cta ${bc.tipo||'Ahorros'} · ${bc.numero||'—'}</small></div>
+            </label>
+            <label class="pay-method-btn" id="pm_efectivo" onclick="selectPay('Efectivo contra entrega')" style="display:flex;align-items:center;gap:1rem;padding:1rem 1.2rem;border-radius:var(--radius-sm);border:2px solid var(--line);background:transparent;cursor:pointer;transition:.3s">
+              <input type="radio" name="pay" value="Efectivo contra entrega" style="display:none">
+              <span style="font-size:1.6rem">💵</span>
+              <div><b style="font-size:.95rem">Efectivo contra entrega</b><br><small style="color:var(--muted-z);font-size:.78rem">Pagas al recibir tu pedido</small></div>
+            </label>
           </div>
-          <div class="f-group"><label>Mensaje para la tarjeta</label><textarea id="f_card" rows="2" placeholder="Escribe un mensaje para quien recibe..."></textarea></div>
+          <div id="payInfo"></div>
         </div>
       </div>
-      <div class="order-sticky" style="position:sticky;top:90px;background:#1A1A1A;padding:2rem;border-radius:12px;border:1px solid #2A2315">
-        <h4 style="margin-bottom:1rem">Resumen</h4>
+      <div class="order-sticky" style="position:sticky;top:90px;background:var(--surface);padding:2rem;border-radius:var(--radius);border:1px solid var(--line)">
+        <h4 style="margin-bottom:1rem;color:var(--gold-z)">Resumen del pedido</h4>
         <div class="sum-items" style="font-size:.9rem">
             ${cart.map(i=>{const p=PRODUCTS.find(x=>x.id===i.id);return `<div class="sum-row" style="display:flex;justify-content:space-between;margin-bottom:.4rem"><span>${i.qty}× ${p.name}</span><span>${money(p.price*i.qty)}</span></div>`}).join('')}
         </div>
-        <div class="divider" style="height:1px;background:#2A2315;margin:1rem 0"></div>
-        <div class="sum-total" style="display:flex;justify-content:space-between;font-size:1.2rem;font-weight:700;color:#C9A84C"><span>Total</span><span>${money(t.total)}</span></div>
-        <button class="btn btn-primary btn-block" style="margin-top:1.5rem;width:100%;padding:1rem;background:#C9A84C;color:#0D0D0D;border:none;font-weight:bold" onclick="placeOrder()">CONFIRMAR PEDIDO</button>
+        <div class="divider" style="height:1px;background:var(--line);margin:1rem 0"></div>
+        ${t.disc?`<div class="sum-row" style="display:flex;justify-content:space-between;font-size:.88rem;color:var(--ok)"><span>Descuento</span><span>−${money(t.disc)}</span></div>`:''}
+        <div class="sum-row" style="display:flex;justify-content:space-between;font-size:.88rem;color:var(--muted)"><span>Envío</span><span>${t.ship===0?'Gratis':money(t.ship)}</span></div>
+        <div class="sum-total" style="display:flex;justify-content:space-between;font-size:1.4rem;font-weight:700;color:var(--gold-z);border-top:1px solid var(--line);padding-top:.8rem;margin-top:.6rem;font-family:var(--serif)"><span>Total</span><span>${money(t.total)}</span></div>
+        <button class="btn btn-primary btn-block" style="margin-top:1.5rem;padding:1rem" onclick="placeOrder()">CONFIRMAR PEDIDO</button>
+        <p style="font-size:.72rem;color:var(--muted-z);text-align:center;margin-top:.8rem">🔒 Tus datos están seguros. Al confirmar aceptas nuestros términos.</p>
       </div>
     </div>
   </div></div>`;
@@ -1714,7 +1745,8 @@ function editProduct(id){
     <div class="frow"><div class="fgroup"><label class="fld">Tamaño</label><select id="e_size">${['Mediano','Grande','XL','XXL','Caja','Maceta'].map(s=>`<option ${s===p.size?'selected':''}>${s}</option>`).join('')}</select></div><div class="fgroup"><label class="fld">Color visual (hex)</label><input id="e_hue" value="${p.hue||'#C97D84'}"></div></div>
     <div class="fgroup">
       <label class="fld">Imagen del producto</label>
-      <input type="file" id="e_img_file" accept="image/*" style="margin-bottom:.5rem">
+      <input type="file" id="e_img_file" accept=".jpg,.jpeg,.png,.webp,image/*" style="margin-bottom:.5rem" onchange="previewAdminImg(this)">
+      <div id="e_img_preview" style="margin:.5rem 0;border-radius:12px;overflow:hidden;max-width:180px;aspect-ratio:4/5;background:var(--cream-2);display:${p.img?'block':'none'}">${p.img?`<img src="${esc(p.img)}" style="width:100%;height:100%;object-fit:cover;display:block">`:''}</div>
       <small style="display:block;margin-bottom:.2rem;color:var(--muted)">O usa una URL de internet:</small>
       <input id="e_img" value="${esc(p.img||'')}" placeholder="https://…">
     </div>
@@ -1730,6 +1762,17 @@ function editProduct(id){
     <button class="btn btn-primary btn-block" onclick="saveProduct('${p.id}',${id?'true':'false'})">Guardar producto</button>
   </div>`);
 }
+function previewAdminImg(input){
+  const prev=$('#e_img_preview');
+  if(input.files && input.files[0]){
+    const reader=new FileReader();
+    reader.onload=e=>{
+      prev.innerHTML=`<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;display:block">`;
+      prev.style.display='block';
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+}
 async function saveProduct(pid,exists){
   const g=id=>$('#'+id).value.trim();
   let imgVal = g('e_img')||null;
@@ -1737,7 +1780,19 @@ async function saveProduct(pid,exists){
   if(fileIn && fileIn.files.length > 0){
     toast('Subiendo imagen...', 'gold');
     try{ imgVal = await DB.uploadImage(fileIn.files[0]); }
-    catch(e){ console.error(e); toast('Error subiendo imagen: '+e.message, 'rose'); return; }
+    catch(e){
+      console.warn('Supabase upload failed, using base64 fallback:', e.message);
+      // Fallback: convert to base64 for demo/local mode
+      try{
+        imgVal = await new Promise((resolve,reject)=>{
+          const reader=new FileReader();
+          reader.onload=ev=>resolve(ev.target.result);
+          reader.onerror=reject;
+          reader.readAsDataURL(fileIn.files[0]);
+        });
+        toast('Imagen guardada localmente','gold');
+      }catch(e2){ toast('Error con la imagen: '+e2.message, 'rose'); return; }
+    }
   }
   const data={id:pid, name:g('e_name'), cat:g('e_cat'), price:+g('e_price')||0, old:g('e_old')?+g('e_old'):null,
     stock:+g('e_stock')||0, color:g('e_color'), flor:g('e_flor'), cantidad:+g('e_cant')||12, size:g('e_size'),
@@ -1957,17 +2012,23 @@ function initScrollReveal(){
 }
 /* ---------- Seleccionar metodo de pago ---------- */
 function selectPay(method){
-  document.querySelectorAll('.pay-method-btn').forEach(b=>b.classList.remove('selected'));
-  const id='pm_'+method.toLowerCase().replace(/ /g,'_').replace('efectivo_contra_entrega','efectivo');
-  const btn=document.getElementById(id)||document.querySelector('.pay-method-btn');
-  if(btn) btn.classList.add('selected');
-  // Guardar metodo seleccionado en dataset del boton confirmar
-  const confirmBtn=document.querySelector('[onclick="placeOrder()"]');
-  if(confirmBtn) confirmBtn.dataset.pay=method;
+  document.querySelectorAll('.pay-method-btn').forEach(b=>{
+    b.classList.remove('selected');
+    b.style.borderColor='var(--line)';
+    b.style.background='transparent';
+    const radio=b.querySelector('input[type=radio]');
+    if(radio) radio.checked=false;
+  });
+  const idMap={'Nequi':'pm_nequi','Bancolombia':'pm_bancolombia','Efectivo contra entrega':'pm_efectivo'};
+  const btn=document.getElementById(idMap[method]);
+  if(btn){
+    btn.classList.add('selected');
+    btn.style.borderColor='var(--gold-z)';
+    btn.style.background='var(--gold-soft)';
+    const radio=btn.querySelector('input[type=radio]');
+    if(radio) radio.checked=true;
+  }
   togglePayInfo();
-  // Mostrar info del metodo
-  const pi=$('#payInfo');
-  if(pi) pi.innerHTML=payManualInfo(method);
 }
 (async function(){
   applySEO();
@@ -1980,7 +2041,7 @@ function selectPay(method){
 /* Exponer funciones usadas en atributos onclick */
 Object.assign(window,{addToCart,buyNow,setQty,removeFromCart,clearCart,toggleFav,applyCoupon,openCart,closeCart,
   toggleFilter,resetFilters,toggleFilters,renderResults,setMaxPrice,setAvailOnly,zoomImg,setRating,submitReview,placeOrder,adminLogin,adminLogout,adminGo,renderAdminMain,
-  setOrderState,setStock,delProduct,editProduct,saveProduct,openModal,closeModal,togglePayInfo,markPaid,exportOrdersCSV,subscribeNews,readPost,selectPay,initScrollReveal});
+  setOrderState,setStock,delProduct,editProduct,saveProduct,openModal,closeModal,togglePayInfo,markPaid,exportOrdersCSV,subscribeNews,readPost,selectPay,initScrollReveal,previewAdminImg});
 </script>
 </body>
 </html>
