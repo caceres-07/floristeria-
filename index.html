@@ -369,6 +369,7 @@ tr:hover td{background:var(--gold-soft)}
 .state.pendiente{background:rgba(232,168,76,.15);color:var(--gold-z-2)} .state.confirmado{background:rgba(76,175,125,.12);color:#4caf7d}
 .state.preparando{background:rgba(138,130,200,.12);color:#9b8ee0} .state.encamino{background:rgba(76,130,210,.12);color:#5b9ef0}
 .state.entregado{background:rgba(76,175,125,.18);color:#5fc88a} .state.cancelado{background:rgba(232,92,92,.12);color:#e85c5c}
+select.state option { background: var(--surface); color: var(--text); font-weight: 500; }
 .admin-login{min-height:100vh;display:grid;place-items:center;padding:20px;background:var(--bg)}
 .admin-login .box{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:2.4rem;max-width:400px;width:100%;text-align:center;box-shadow:var(--shadow),var(--shadow-gold)}
 .stock-bar{height:5px;border-radius:3px;background:rgba(201,168,76,.1);overflow:hidden;margin-top:.4rem}
@@ -1163,7 +1164,7 @@ function viewCatalog(catParam){
   </div>`;
 }
 function renderFilters(){
-  const cats=CATEGORIES.map(c=>c.name);
+  const cats=[...new Set(PRODUCTS.map(p=>p.cat))];
   $('#filters').innerHTML=`
     <h4>Filtros</h4><p style="font-size:.82rem;color:var(--muted);margin-bottom:.4rem">Refina tu búsqueda</p>
     <div class="fgrp"><div class="ttl">Categoría</div>${cats.map(c=>`<label class="check"><input type="checkbox" value="${esc(c)}" ${currentFilters.cats.has(c)?'checked':''} onchange="toggleFilter('cats',this.value)"> ${esc(c)}</label>`).join('')}</div>
@@ -1381,23 +1382,23 @@ function togglePayInfo(){
 function generateInvoiceText(num, info){
   const neg=N.nombre||'ZOLER', pm=CFG.pagoManual||{};
   const fmtDate=d=>{if(!d)return '';try{const[y,m,dd]=d.split('-');return `${dd}/${m}/${y}`;}catch(e){return d;}};
-  let t=`✨ *Pedido confirmado*\n*${neg}* — Floristería de autor\n\n`;
-  t+=`🧳 *Número de pedido:* ${num}\n`;
-  t+=`👤 *Cliente:* ${info.name}\n`;
-  if(info.phone) t+=`📱 *Teléfono:* ${info.phone}\n`;
-  if(info.address) t+=`📍 *Entrega:* ${info.address}${info.city?', '+info.city:''}\n`;
-  if(info.delivDate) t+=`📅 *Fecha:* ${fmtDate(info.delivDate)}${info.delivTime?' a las '+info.delivTime:''}\n`;
-  if(info.receiver) t+=`👥 *Recibe:* ${info.receiver}\n`;
-  if(info.card) t+=`💌 *Tarjeta:* "${info.card}"\n`;
+  let t=`*Pedido confirmado*\n*${neg}* — Floristería de autor\n\n`;
+  t+=`*Número de pedido:* ${num}\n`;
+  t+=`*Cliente:* ${info.name}\n`;
+  if(info.phone) t+=`*Teléfono:* ${info.phone}\n`;
+  if(info.address) t+=`*Entrega:* ${info.address}${info.city?', '+info.city:''}\n`;
+  if(info.delivDate) t+=`*Fecha:* ${fmtDate(info.delivDate)}${info.delivTime?' a las '+info.delivTime:''}\n`;
+  if(info.receiver) t+=`*Recibe:* ${info.receiver}\n`;
+  if(info.card) t+=`*Tarjeta:* "${info.card}"\n`;
   if(Array.isArray(info.items)&&info.items.length){
-    t+=`\n🌸 *Pedido:*\n`;
+    t+=`\n*Pedido:*\n`;
     info.items.forEach(i=>{ t+=`• ${i.name} ×${i.qty} — ${money(i.price*i.qty)}\n`; });
   }
-  t+=`\n💰 *Total: ${money(info.total)}*\n`;
-  t+=`💳 *Pago:* ${info.pay}\n`;
-  if(info.pay==='Nequi'&&pm.nequi) t+=`\n📲 Transfiere al Nequi *${pm.nequi}* y envínos el comprobante por WhatsApp para confirmar.\n`;
-  else if(info.pay==='Bancolombia'&&pm.bancolombia){const b=pm.bancolombia;t+=`\n🏦 Cta ${b.tipo||'Ahorros'} *${b.numero||''}* · ${b.titular||''}\nEnvínos el comprobante por WhatsApp para confirmar.\n`;}
-  t+=`\n📞 Contacto: wa.me/${CONTACT.phone}`;
+  t+=`\n*Total: ${money(info.total)}*\n`;
+  t+=`*Pago:* ${info.pay}\n`;
+  if(info.pay==='Nequi'&&pm.nequi) t+=`\nTransfiere al Nequi *${pm.nequi}* y envíanos el comprobante por WhatsApp para confirmar.\n`;
+  else if(info.pay==='Bancolombia'&&pm.bancolombia){const b=pm.bancolombia;t+=`\nCta ${b.tipo||'Ahorros'} *${b.numero||''}* · ${b.titular||''}\nEnvíanos el comprobante por WhatsApp para confirmar.\n`;}
+  t+=`\nContacto: wa.me/${CONTACT.phone}`;
   return t;
 }
 function generateInvoiceHtml(num, info){
@@ -1407,8 +1408,8 @@ function generateInvoiceHtml(num, info){
     ?info.items.map(i=>`<tr><td style="padding:10px 16px;border-bottom:1px solid #2A2315;color:#F5F0E8">${i.name}</td><td style="padding:10px 16px;border-bottom:1px solid #2A2315;text-align:center;color:#F5F0E8">${i.qty}</td><td style="padding:10px 16px;border-bottom:1px solid #2A2315;text-align:right;color:#8A8070">${money(i.price)}</td><td style="padding:10px 16px;border-bottom:1px solid #2A2315;text-align:right;font-weight:700;color:#C9A84C">${money(i.price*i.qty)}</td></tr>`).join('')
     :'';
   let payInfo='';
-  if(info.pay==='Nequi'&&pm.nequi) payInfo=`<div style="background:#2A2315;border-radius:12px;padding:16px;font-size:13px;line-height:1.6;color:#E8C97A">&#128242; Transfiere <strong>${money(info.total)}</strong> al Nequi <strong>${pm.nequi}</strong> y envíanos la captura por WhatsApp para confirmar tu pedido.</div>`;
-  else if(info.pay==='Bancolombia'&&pm.bancolombia){const b=pm.bancolombia;payInfo=`<div style="background:#2A2315;border-radius:12px;padding:16px;font-size:13px;line-height:1.6;color:#E8C97A">&#127970; Cta ${b.tipo||'Ahorros'} <strong>${b.numero||''}</strong><br>Titular: ${b.titular||''} &middot; ${b.cedula||''}<br>Envíanos el comprobante por WhatsApp.</div>`;}
+  if(info.pay==='Nequi'&&pm.nequi) payInfo=`<div style="background:#2A2315;border-radius:12px;padding:16px;font-size:13px;line-height:1.6;color:#E8C97A">Transfiere <strong>${money(info.total)}</strong> al Nequi <strong>${pm.nequi}</strong> y envíanos la captura por WhatsApp para confirmar tu pedido.</div>`;
+  else if(info.pay==='Bancolombia'&&pm.bancolombia){const b=pm.bancolombia;payInfo=`<div style="background:#2A2315;border-radius:12px;padding:16px;font-size:13px;line-height:1.6;color:#E8C97A">Cta ${b.tipo||'Ahorros'} <strong>${b.numero||''}</strong><br>Titular: ${b.titular||''} &middot; ${b.cedula||''}<br>Envíanos el comprobante por WhatsApp.</div>`;}
   return `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Pedido ${num} — ZOLER</title></head>
 <body style="margin:0;padding:24px;background:#0D0D0D;font-family:'Segoe UI',Arial,sans-serif">
 <div style="max-width:600px;margin:0 auto;background:#1A1A1A;border-radius:20px;overflow:hidden;border:1px solid rgba(201,168,76,.2);box-shadow:0 20px 60px rgba(0,0,0,.5)">
@@ -1656,7 +1657,7 @@ async function renderAdminMain(){
     const rev=orders.filter(o=>o.state!=='Cancelado').reduce((s,o)=>s+(o.total||0),0);
     const pend=orders.filter(o=>o.state==='Pendiente').length;
     const lowStock=PRODUCTS.filter(p=>p.stock>0&&p.stock<=5).length;
-    el.innerHTML=`<div class="admin-head"><h2>Resumen</h2><span class="pill">🟢 En tiempo real</span></div>
+    el.innerHTML=`<div class="admin-head"><h2>Resumen</h2><div><button class="btn btn-ghost btn-sm" onclick="seedDB()">🌱 Cargar Productos Prueba</button> <span class="pill">🟢 En tiempo real</span></div></div>
       <div class="kpis">
         <div class="kpi"><small>Pedidos totales</small><b>${orders.length}</b></div>
         <div class="kpi"><small>Ventas acumuladas</small><b>${money(rev)}</b></div>
@@ -1667,7 +1668,17 @@ async function renderAdminMain(){
       ${ordersTable(orders.slice(0,6))}`;
   }
   else if(adminTab==='orders'){
-    el.innerHTML=`<div class="admin-head"><h2>Pedidos</h2><div><button class="btn btn-ghost btn-sm" onclick="exportOrdersCSV()">⬇ Exportar CSV</button> <span class="pill">${orders.length} pedidos</span></div></div>${ordersTable(orders)}`;
+    const activos = orders.filter(o=>o.state!=='Entregado' && o.state!=='Cancelado');
+    const archivados = orders.filter(o=>o.state==='Entregado' || o.state==='Cancelado');
+    const showArchived = window.adminOrderTab === 'archived';
+    const list = showArchived ? archivados : activos;
+    
+    el.innerHTML=`<div class="admin-head"><h2>Pedidos</h2><div><button class="btn btn-ghost btn-sm" onclick="exportOrdersCSV()">⬇ Exportar CSV</button> <span class="pill">${orders.length} pedidos</span></div></div>
+      <div style="margin-bottom:1.4rem;display:flex;gap:.5rem;border-bottom:1px solid var(--line);padding-bottom:.8rem">
+        <button class="btn ${!showArchived?'btn-gold':'btn-ghost'} btn-sm" onclick="window.adminOrderTab='active';renderAdminMain()">Activos (${activos.length})</button>
+        <button class="btn ${showArchived?'btn-gold':'btn-ghost'} btn-sm" onclick="window.adminOrderTab='archived';renderAdminMain()">Archivados (${archivados.length})</button>
+      </div>
+      ${ordersTable(list)}`;
   }
   else if(adminTab==='products'){
     el.innerHTML=`<div class="admin-head"><h2>Productos</h2><button class="btn btn-primary btn-sm" onclick="editProduct()">+ Agregar producto</button></div>
@@ -1736,7 +1747,7 @@ function editProduct(id){
   const p=id?PRODUCTS.find(x=>x.id===id):{id:'p'+Date.now(),name:'',price:0,old:null,cat:'Rosas',color:'Rojo',flor:'',cantidad:12,size:'Mediano',occasions:[],rating:5,reviews:0,stock:10,desc:'',long:'',care:['Cambia el agua cada 2 días'],dur:'7 días',featured:false,best:false,isNew:true,hue:'#C97D84',tags:[]};
   openModal(`<div style="padding:2rem">
     <h2 style="font-size:1.8rem;margin-bottom:1rem">${id?'Editar':'Nuevo'} producto</h2>
-    <div class="frow"><div class="fgroup"><label class="fld">Nombre</label><input id="e_name" value="${esc(p.name)}"></div><div class="fgroup"><label class="fld">Categoría</label><select id="e_cat">${CATEGORIES.map(c=>`<option ${c.name===p.cat?'selected':''}>${c.name}</option>`).join('')}</select></div></div>
+    <div class="frow"><div class="fgroup"><label class="fld">Nombre</label><input id="e_name" value="${esc(p.name)}"></div><div class="fgroup"><label class="fld">Categoría</label><input id="e_cat" list="catsList" value="${esc(p.cat)}" placeholder="Escribe o elige una categoría"><datalist id="catsList">${[...new Set(PRODUCTS.map(x=>x.cat))].map(c=>`<option value="${esc(c)}">`).join('')}</datalist></div></div>
     <div class="frow"><div class="fgroup"><label class="fld">Precio</label><input id="e_price" type="number" value="${p.price}"></div><div class="fgroup"><label class="fld">Precio anterior (opcional)</label><input id="e_old" type="number" value="${p.old||''}"></div></div>
     <div class="frow"><div class="fgroup"><label class="fld">Stock</label><input id="e_stock" type="number" value="${p.stock}"></div><div class="fgroup"><label class="fld">Color</label><select id="e_color">${Object.keys(COLORS).map(c=>`<option ${c===p.color?'selected':''}>${c}</option>`).join('')}</select></div></div>
     <div class="frow"><div class="fgroup"><label class="fld">Tipo de flores</label><select id="e_flor"><option value="">Seleccionar...</option>${['Rosas rojas premium','Rosas rosadas','Rosas blancas','Rosas preservadas','Rosas y eucalipto','Rosas rosadas y peonías','Rosas rosadas y ranúnculos','Rosas, claveles y hortensias','Rosas y lisianthus blancos','Rosas, hortensias y orquídeas','Girasoles','Tulipanes importados','Gerberas, lisianthus y astromelia','Orquídea Phalaenopsis','Hortensias','Claveles','Lirios','Margaritas','Astromelias','Mix variado'].map(f=>`<option ${f===p.flor?'selected':''}>${f}</option>`).join('')}</select></div><div class="fgroup"><label class="fld">Cantidad de flores</label><input id="e_cant" type="number" value="${p.cantidad}"></div></div>
@@ -2027,6 +2038,21 @@ function selectPay(method){
   }
   togglePayInfo();
 }
+
+async function seedDB(){
+  if(!confirm('¿Cargar 12 productos de prueba en tu tienda?')) return;
+  toast('Cargando... por favor espera', 'gold');
+  try {
+    for(const p of SEED_PRODUCTS) {
+      await sb.from('products').upsert(productToRow(p));
+    }
+    toast('¡Productos cargados con éxito!', 'gold');
+    setTimeout(()=>location.reload(), 1000);
+  } catch(e) {
+    toast('Error al cargar productos: '+e.message, 'rose');
+  }
+}
+
 (async function(){
   applySEO();
   fillFooter();
