@@ -1778,21 +1778,15 @@ async function saveProduct(pid,exists){
   let imgVal = g('e_img')||null;
   const fileIn = $('#e_img_file');
   if(fileIn && fileIn.files.length > 0){
-    toast('Subiendo imagen...', 'gold');
-    try{ imgVal = await DB.uploadImage(fileIn.files[0]); }
-    catch(e){
-      console.warn('Supabase upload failed, using base64 fallback:', e.message);
-      // Fallback: convert to base64 for demo/local mode
-      try{
-        imgVal = await new Promise((resolve,reject)=>{
-          const reader=new FileReader();
-          reader.onload=ev=>resolve(ev.target.result);
-          reader.onerror=reject;
-          reader.readAsDataURL(fileIn.files[0]);
-        });
-        toast('Imagen guardada localmente','gold');
-      }catch(e2){ toast('Error con la imagen: '+e2.message, 'rose'); return; }
-    }
+    toast('Procesando imagen...', 'gold');
+    try{
+      imgVal = await new Promise((resolve,reject)=>{
+        const reader=new FileReader();
+        reader.onload=ev=>resolve(ev.target.result);
+        reader.onerror=()=>reject(new Error('No se pudo leer la imagen'));
+        reader.readAsDataURL(fileIn.files[0]);
+      });
+    }catch(e){ toast('Error con la imagen: '+e.message, 'rose'); return; }
   }
   const data={id:pid, name:g('e_name'), cat:g('e_cat'), price:+g('e_price')||0, old:g('e_old')?+g('e_old'):null,
     stock:+g('e_stock')||0, color:g('e_color'), flor:g('e_flor'), cantidad:+g('e_cant')||12, size:g('e_size'),
