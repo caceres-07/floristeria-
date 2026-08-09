@@ -1208,6 +1208,7 @@ function renderResults(){
   else list.sort((a,b)=>(b.featured?1:0)-(a.featured?1:0));
   const box=$('#results');
   box.innerHTML = list.length ? list.map(productCard).join('') : `<div class="empty" style="grid-column:1/-1"><span class="em">🔍</span>No encontramos flores con esos filtros.<br><button class="btn btn-ghost btn-sm" style="margin-top:1rem" onclick="resetFilters()">Limpiar filtros</button></div>`;
+  requestAnimationFrame(()=>initScrollReveal());
 }
 
 function viewProduct(id){
@@ -1892,7 +1893,7 @@ async function render(){
   // nav activo
   document.querySelectorAll('nav.main a').forEach(a=>a.classList.remove('active'));
 
-  if(parts[0]==='admin'){ app.innerHTML=await viewAdmin(); if(adminAuthed){ renderAdminMain(); startOrderWatch(); } document.querySelector('[data-nav="/admin"]')?.classList.add('active'); return; }
+  if(parts[0]==='admin'){ app.innerHTML=await viewAdmin(); if(adminAuthed){ renderAdminMain(); startOrderWatch(); } document.querySelector('[data-nav="/admin"]')?.classList.add('active'); requestAnimationFrame(()=>initScrollReveal()); return; }
 
   if(parts[0]==='catalogo'){
     const cat=parts[1]?decodeURIComponent(parts[1]):null;
@@ -1903,21 +1904,22 @@ async function render(){
     $('#sortIn').value=currentFilters.sort;
     $('#sortIn').onchange=e=>{currentFilters.sort=e.target.value;renderResults();};
     document.querySelector('[data-nav="/catalogo"]')?.classList.add('active');
+    requestAnimationFrame(()=>initScrollReveal());
     return;
   }
-  if(parts[0]==='producto'){ app.innerHTML=viewProduct(parts[1]); renderReviews(parts[1]); return; }
-  if(parts[0]==='wishlist'){ app.innerHTML=viewWishlist(); return; }
-  if(parts[0]==='checkout'){ app.innerHTML=viewCheckout(); togglePayInfo(); return; }
-  if(parts[0]==='confirmacion'){ app.innerHTML=await viewConfirmation(parts[1]); return; }
-  if(parts[0]==='faq'){ app.innerHTML=viewFAQ(); document.querySelector('[data-nav="/faq"]')?.classList.add('active'); return; }
-  if(parts[0]==='blog'){ app.innerHTML=viewBlog(); document.querySelector('[data-nav="/blog"]')?.classList.add('active'); return; }
+  if(parts[0]==='producto'){ app.innerHTML=viewProduct(parts[1]); renderReviews(parts[1]); requestAnimationFrame(()=>initScrollReveal()); return; }
+  if(parts[0]==='wishlist'){ app.innerHTML=viewWishlist(); requestAnimationFrame(()=>initScrollReveal()); return; }
+  if(parts[0]==='checkout'){ app.innerHTML=viewCheckout(); togglePayInfo(); requestAnimationFrame(()=>initScrollReveal()); return; }
+  if(parts[0]==='confirmacion'){ app.innerHTML=await viewConfirmation(parts[1]); requestAnimationFrame(()=>initScrollReveal()); return; }
+  if(parts[0]==='faq'){ app.innerHTML=viewFAQ(); document.querySelector('[data-nav="/faq"]')?.classList.add('active'); requestAnimationFrame(()=>initScrollReveal()); return; }
+  if(parts[0]==='blog'){ app.innerHTML=viewBlog(); document.querySelector('[data-nav="/blog"]')?.classList.add('active'); requestAnimationFrame(()=>initScrollReveal()); return; }
 
   // Home por defecto
   app.innerHTML=viewHome();
   const w2=$('#waLink2'); if(w2)w2.href=waLink();
   const w3=$('#waLink3'); if(w3)w3.href=waLink();
   document.querySelector('[data-nav="/"]')?.classList.add('active');
-  // Activar animaciones de scroll en la home
+  // Activar animaciones de scroll
   requestAnimationFrame(()=>initScrollReveal());
 }
 window.addEventListener('hashchange',render);
@@ -1999,7 +2001,7 @@ function initScrollReveal(){
       }
     });
   },{threshold:0.12,rootMargin:'0px 0px -40px 0px'});
-  document.querySelectorAll('.reveal,.reveal-left,.reveal-scale').forEach((el,i)=>{
+  document.querySelectorAll('.reveal:not(.visible),.reveal-left:not(.visible),.reveal-scale:not(.visible)').forEach((el,i)=>{
     el.style.transitionDelay=(i%8)*.07+'s';
     obs.observe(el);
   });
