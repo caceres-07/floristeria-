@@ -1,15 +1,14 @@
 /**
  * api/send-email.js — Vercel Serverless Function
- * Envía correos usando Resend (resend.com — 100 emails/día gratis)
+ * Envía correos usando Resend (resend.com — 3.000 correos/mes gratis)
  *
  * Variables de entorno requeridas en Vercel → Settings → Environment Variables:
  *   RESEND_API_KEY   → tu clave API de resend.com (empieza con "re_")
- *   RESEND_FROM      → correo verificado como remitente, ej: pedidos@floryalma.co
- *                      (si no tienes dominio propio, usa: onboarding@resend.dev)
+ *   RESEND_FROM      → correo remitente verificado, ej: pedidos@tudominio.co
+ *                      Si no tienes dominio propio usa: onboarding@resend.dev
  */
 module.exports = async function handler(req, res) {
-  const allowedOrigin = process.env.ALLOWED_ORIGIN || '*';
-  res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
+  res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   if (req.method === 'OPTIONS') return res.status(200).end();
@@ -17,18 +16,25 @@ module.exports = async function handler(req, res) {
 
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) {
-    // Sin clave: no es un error crítico, la tienda sigue funcionando
     console.warn('[send-email] RESEND_API_KEY no configurada — email omitido');
     return res.status(200).json({ ok: false, reason: 'no_api_key' });
   }
 
   try {
-    const { to, subject, html } = req.body;
+    const { to, subject, html, replyTo } = req.body;
     if (!to || !subject || !html) {
-      return res.status(400).json({ error: 'Faltan campos: to, subject, html' });
+      return res.status(400).json({ error: 'Faltan campos requeridos: to, subject, html' });
     }
 
     const from = process.env.RESEND_FROM || 'onboarding@resend.dev';
+
+    const payload = {
+      from,
+      to: [to],
+      subject,
+      html,
+    };
+    if (replyTo) payload.reply_to = replyTo;
 
     const r = await fetch('https://api.resend.com/emails', {
       method: 'POST',
@@ -36,7 +42,7 @@ module.exports = async function handler(req, res) {
         'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ from, to: [to], subject, html })
+      body: JSON.stringify(payload)
     });
 
     const data = await r.json();
@@ -48,7 +54,7 @@ module.exports = async function handler(req, res) {
 
     return res.status(200).json({ ok: true, id: data.id });
   } catch (err) {
-    console.error('[send-email] Error:', err);
-    return res.status(500).json({ error: 'Error interno' });
+    console.error('[send-email] Error inesperado:', err);
+    return res.status(500).json({ error: 'Error interno del servidor' });
   }
 };

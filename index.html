@@ -457,6 +457,20 @@ html[data-theme="light"] .pay-method-btn:hover,.pay-method-btn.selected{backgrou
 }
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto}}
 
+/* ---------- Estilos de impresion (PDF de pedidos) ---------- */
+@media print{
+  body{background:#fff!important;color:#000!important;font-family:'Segoe UI',Arial,sans-serif;font-size:11px}
+  .site,footer.site,.admin-side,#toasts,.wa-float,.chat-btn,.modal,.overlay,.drawer,.admin-head .btn{display:none!important}
+  .admin-main{padding:0!important}
+  table{width:100%;border-collapse:collapse;font-size:10px}
+  th,td{border:1px solid #ccc;padding:5px 7px}
+  th{background:#f5f5f5;font-weight:600}
+  .state{border:1px solid #ccc;border-radius:4px;padding:2px 5px}
+  h2{font-size:16px;margin-bottom:8px}
+  .kpis,select{display:none}
+  @page{margin:15mm}
+}
+
 /* ============================================================
    RESPONSIVE MEJORADO
    ============================================================ */
@@ -773,9 +787,16 @@ const DB = {
   },
   watchOrders(cb){
     if(!ONLINE) return null;
-    return sb.channel('orders-rt').on('postgres_changes',{event:'INSERT',schema:'public',table:'orders'},payload=>{
-      cb(payload.new);
-    }).subscribe();
+    return sb.channel('orders-rt')
+      .on('postgres_changes',{event:'INSERT',schema:'public',table:'orders'},payload=>{ cb(payload.new); })
+      .on('postgres_changes',{event:'UPDATE',schema:'public',table:'orders'},payload=>{ cb(payload.new); })
+      .subscribe();
+  },
+  watchProducts(cb){
+    if(!ONLINE) return null;
+    return sb.channel('products-rt')
+      .on('postgres_changes',{event:'*',schema:'public',table:'products'},payload=>{ cb(payload); })
+      .subscribe();
   },
   /* Busca un pedido por número — usado si el resumen local se pierde (ej. tras redireccionamiento de Wompi) */
   async fetchOrderByNum(num){
@@ -805,7 +826,7 @@ const DB = {
    ============================================================ */
 const CATEGORIES = [
   {emoji:'💐',name:'Bouquets'},{emoji:'📦',name:'Cajas Florales'},{emoji:'👑',name:'Diseños Premium Zoler'},
-  {emoji:'🏛️',name:'Gran Formato'},{emoji:'🎀',name:'Detalles & Extras'},{emoji:'💌',name:'Tarjetas'}
+  {emoji:'🏛️',name:'Gran Formato'},{emoji:'🎀',name:'Detalles & Extras'},{emoji:'',name:'Tarjetas'}
 ];
 const COLORS = {'Rojo':'#c0392b','Rosa':'#e78ba0','Blanco':'#f4f0e8','Amarillo':'#e6b800','Naranja':'#e08a34','Morado':'#8e5aa8','Verde':'#6a9a6f','Mixto':'linear-gradient(135deg,#c0392b,#e6b800,#8e5aa8)'};
 const OCCASIONS = ['Cumpleaños','Amor','Aniversario','Día de la Madre','San Valentín','Graduación','Condolencias','Matrimonio','Nacimiento','Agradecimiento'];
@@ -919,11 +940,11 @@ function updateBadges(){
 }
 async function addToCart(id,qty){
   const p=PRODUCTS.find(x=>x.id===id); if(!p) return;
-  if(p.stock<=0){toast('Este producto está agotado 🥀','rose');return;}
+  if(p.stock<=0){toast('Este producto está agotado','rose');return;}
   const line=cart.find(i=>i.id===id);
   if(line){ line.qty=Math.min(line.qty+(qty||1), p.stock); }
   else cart.push({id, qty:Math.min(qty||1,p.stock)});
-  await saveCart(); toast(`${p.name} añadido al carrito 🌸`);
+  await saveCart(); toast(`${p.name} añadido al carrito`);
 }
 async function setQty(id,delta){
   const line=cart.find(i=>i.id===id); if(!line) return;
@@ -935,7 +956,7 @@ async function removeFromCart(id){ cart=cart.filter(i=>i.id!==id); await saveCar
 async function clearCart(){ cart=[]; appliedCoupon=null; await saveCart(); }
 async function toggleFav(id){
   if(favs.includes(id)) favs=favs.filter(f=>f!==id);
-  else { favs.push(id); toast('Guardado en favoritos 💚'); }
+  else { favs.push(id); toast('Guardado en favoritos'); }
   await saveFavs();
   document.querySelectorAll(`[data-fav="${id}"]`).forEach(b=>b.classList.toggle('on',favs.includes(id)));
 }
@@ -949,7 +970,7 @@ function cartTotals(){
 }
 function renderCart(){
   const box=$('#cartItems'), foot=$('#cartFoot');
-  if(!cart.length){ box.innerHTML=`<div class="empty"><span class="em">🌷</span>Tu carrito está vacío.<br><br><a href="#/catalogo" class="btn btn-primary btn-sm" onclick="closeCart()">Ver catálogo</a></div>`; foot.innerHTML=''; return; }
+  if(!cart.length){ box.innerHTML=`<div class="empty">Tu carrito está vacío.<br><br><a href="#/catalogo" class="btn btn-primary btn-sm" onclick="closeCart()">Ver catálogo</a></div>`; foot.innerHTML=''; return; }
   box.innerHTML=cart.map(i=>{const p=PRODUCTS.find(x=>x.id===i.id);if(!p)return'';return `
     <div class="ci">
       <div class="th">${productMedia(p)}</div>
@@ -961,7 +982,7 @@ function renderCart(){
   const t=cartTotals();
   foot.innerHTML=`
     <div class="coupon-row"><input id="couponIn" placeholder="Código de cupón" value="${appliedCoupon||''}"><button class="btn btn-ghost btn-sm" onclick="applyCoupon()">Aplicar</button></div>
-    ${appliedCoupon?`<div class="pill" style="margin-bottom:.6rem">🎟️ ${COUPONS[appliedCoupon].label} activo</div>`:''}
+    ${appliedCoupon?`<div class="pill" style="margin-bottom:.6rem">${COUPONS[appliedCoupon].label} activo</div>`:''}
     <div class="sum-row"><span>Subtotal</span><span>${money(t.sub)}</span></div>
     ${t.disc?`<div class="sum-row" style="color:var(--rose-deep)"><span>Descuento</span><span>−${money(t.disc)}</span></div>`:''}
     <div class="sum-row"><span>Envío</span><span>${t.ship===0?'Gratis':money(t.ship)}</span></div>
@@ -974,7 +995,7 @@ function renderCart(){
 async function applyCoupon(){
   const code=($('#couponIn').value||'').trim().toUpperCase();
   if(!code){appliedCoupon=null;renderCart();return;}
-  if(COUPONS[code]){appliedCoupon=code;toast('Cupón aplicado 🎟️','gold');}
+  if(COUPONS[code]){appliedCoupon=code;toast('Cupón aplicado','gold');}
   else {appliedCoupon=null;toast('Ese cupón no es válido','rose');}
   renderCart();
 }
@@ -1110,10 +1131,10 @@ function viewHome(){
     </div>
     <div class="contact-grid">
       <div class="info-card reveal">
-        <div class="info-row"><div class="ic">📦</div><div><b>Envíos</b><br><span>Realizamos envíos a todo Colombia. Tiempo de entrega: mismo día o 24–48h según tu ciudad.</span></div></div>
-        <div class="info-row"><div class="ic">📞</div><div><b>Teléfono</b><br><span>${CONTACT.display}</span></div></div>
+        <div class="info-row"><div class="ic"><div><b>Envíos</b><br><span>Realizamos envíos a todo Colombia. Tiempo de entrega: mismo día o 24–48h según tu ciudad.</span></div></div>
+        <div class="info-row"><div class="ic"><div><b>Teléfono</b><br><span>${CONTACT.display}</span></div></div>
         <div class="info-row"><div class="ic">✉️</div><div><b>Correo</b><br><span>${CONTACT.email}</span></div></div>
-        <div class="info-row"><div class="ic">🕑</div><div><b>Horarios de atención</b><br>${CONTACT.hours.map(h=>`<span>${h}</span>`).join('<br>')}</div></div>
+        <div class="info-row"><div class="ic"><div><b>Horarios de atención</b><br>${CONTACT.hours.map(h=>`<span>${h}</span>`).join('<br>')}</div></div>
         <div class="socials">
           <a href="${CONTACT.ig}" target="_blank" rel="noopener" aria-label="Instagram" title="Instagram">📷</a>
           <a href="${CONTACT.fb}" target="_blank" rel="noopener" aria-label="Facebook" title="Facebook">f</a>
@@ -1127,7 +1148,7 @@ function viewHome(){
           <h3 style="font-size:1.6rem;margin-bottom:.5rem">ZOLER</h3>
           <p style="color:var(--muted-z);font-size:.9rem;line-height:1.7">Diseñado para Sorprender.<br>Flores y arreglos de autor para toda Colombia.</p>
         </div>
-        <a id="waLink3" href="#" class="btn btn-primary" target="_blank" rel="noopener">💬 Escríbenos por WhatsApp</a>
+        <a id="waLink3" href="#" class="btn btn-primary" target="_blank" rel="noopener">Escríbenos por WhatsApp</a>
       </div>
     </div>
   </div></section>`;
@@ -1164,7 +1185,8 @@ function viewCatalog(catParam){
   </div>`;
 }
 function renderFilters(){
-  const cats=[...new Set(PRODUCTS.map(p=>p.cat))];
+  const dynCats=[...new Set(PRODUCTS.map(p=>p.cat).filter(Boolean))];
+  const cats=dynCats.length?dynCats:CATEGORIES.map(c=>c.name);
   $('#filters').innerHTML=`
     <h4>Filtros</h4><p style="font-size:.82rem;color:var(--muted);margin-bottom:.4rem">Refina tu búsqueda</p>
     <div class="fgrp"><div class="ttl">Categoría</div>${cats.map(c=>`<label class="check"><input type="checkbox" value="${esc(c)}" ${currentFilters.cats.has(c)?'checked':''} onchange="toggleFilter('cats',this.value)"> ${esc(c)}</label>`).join('')}</div>
@@ -1205,13 +1227,13 @@ function renderResults(){
   else if(s==='nuevos') list.sort((a,b)=>(b.isNew?1:0)-(a.isNew?1:0));
   else list.sort((a,b)=>(b.featured?1:0)-(a.featured?1:0));
   const box=$('#results');
-  box.innerHTML = list.length ? list.map(productCard).join('') : `<div class="empty" style="grid-column:1/-1"><span class="em">🔍</span>No encontramos flores con esos filtros.<br><button class="btn btn-ghost btn-sm" style="margin-top:1rem" onclick="resetFilters()">Limpiar filtros</button></div>`;
+  box.innerHTML = list.length ? list.map(productCard).join('') : `<div class="empty" style="grid-column:1/-1">No encontramos flores con esos filtros.<br><button class="btn btn-ghost btn-sm" style="margin-top:1rem" onclick="resetFilters()">Limpiar filtros</button></div>`;
   requestAnimationFrame(()=>initScrollReveal());
 }
 
 function viewProduct(id){
   const p=PRODUCTS.find(x=>x.id===id);
-  if(!p) return `<div class="wrap block" style="padding-top:120px"><div class="empty"><span class="em">🥀</span>Producto no encontrado.</div></div>`;
+  if(!p) return `<div class="wrap block" style="padding-top:120px"><div class="empty">Producto no encontrado.</div></div>`;
   const disc=p.old?Math.round((1-p.price/p.old)*100):0;
   const related=PRODUCTS.filter(r=>r.id!==p.id && (r.cat===p.cat||r.color===p.color)).slice(0,4);
   const imgs=[p, {...p,hue:p.hue}, {...p}, {...p}];
@@ -1282,7 +1304,7 @@ async function submitReview(id){
   const t=$('#revText').value.trim(); if(!t){toast('Escribe tu opinión primero','rose');return;}
   await DB.addReview(id,{n:'Cliente',r:pendingRating,t,d:'Ahora'});
   $('#revText').value=''; renderReviews(id);
-  toast('¡Gracias por tu opinión! 🌟','gold');
+  toast('Gracias por tu opinión','gold');
 }
 function zoomImg(id){const p=PRODUCTS.find(x=>x.id===id);openModal(`<div style="padding:0">${productMedia(p,'',true)}</div>`);}
 
@@ -1290,12 +1312,12 @@ function viewWishlist(){
   const list=PRODUCTS.filter(p=>favs.includes(p.id));
   return `<div class="wrap block" style="padding-top:calc(var(--header-h) + 2.4rem)">
     <div class="sec-head"><div><span class="eyebrow">Tu selección</span><h2>Lista de deseos</h2><p>Guarda tus flores favoritas para más tarde.</p></div></div>
-    ${list.length?`<div class="grid cols4">${list.map(productCard).join('')}</div>`:`<div class="empty"><span class="em">💚</span>Aún no tienes favoritos.<br><br><a href="#/catalogo" class="btn btn-primary btn-sm">Explorar catálogo</a></div>`}
+    ${list.length?`<div class="grid cols4">${list.map(productCard).join('')}</div>`:`<div class="empty">Aún no tienes favoritos.<br><br><a href="#/catalogo" class="btn btn-primary btn-sm">Explorar catálogo</a></div>`}
   </div>`;
 }
 
 function viewCheckout(){
-  if(!cart.length) return `<div class="wrap block" style="padding-top:120px"><div class="empty"><span class="em">🛒</span>Tu carrito está vacío.<br><br><a href="#/catalogo" class="btn btn-primary btn-sm">Ir al catálogo</a></div></div>`;
+  if(!cart.length) return `<div class="wrap block" style="padding-top:120px"><div class="empty">Tu carrito está vacío.<br><br><a href="#/catalogo" class="btn btn-primary btn-sm">Ir al catálogo</a></div></div>`;
   const t=cartTotals();
   const today=new Date().toISOString().split('T')[0];
   const pm=CFG.pagoManual||{};
@@ -1313,7 +1335,7 @@ function viewCheckout(){
           <div class="frow"><div class="fgroup"><label class="fld">Ciudad *</label><input id="f_city" placeholder="Ciudad"></div><div class="fgroup"><label class="fld">Barrio</label><input id="f_hood" placeholder="Barrio o localidad"></div></div>
           <div class="frow"><div class="fgroup"><label class="fld">Fecha de entrega *</label><input id="f_date" type="date" min="${today}"></div><div class="fgroup"><label class="fld">Hora preferida</label><select id="f_time"><option value="">Cualquier hora</option><option>Mañana (8am-12pm)</option><option>Tarde (12pm-5pm)</option><option>Noche (5pm-8pm)</option></select></div></div>
           <div class="fgroup"><label class="fld">¿Quién recibe? (si es diferente a ti)</label><input id="f_recv" placeholder="Nombre de quien recibe"></div>
-          <div class="fgroup"><label class="fld">Mensaje para la tarjeta 💌</label><textarea id="f_card" rows="2" placeholder="Escribe un mensaje especial para quien recibe..."></textarea></div>
+          <div class="fgroup"><label class="fld">Mensaje para la tarjeta</label><textarea id="f_card" rows="2" placeholder="Escribe un mensaje especial para quien recibe..."></textarea></div>
           <div class="fgroup"><label class="fld">Notas adicionales</label><textarea id="f_notes" rows="2" placeholder="Instrucciones de entrega, piso, portería..."></textarea></div>
         </div>
         <div class="info-card" style="background:var(--surface);border:1px solid var(--line);margin-top:1.4rem">
@@ -1321,17 +1343,17 @@ function viewCheckout(){
           <div style="display:grid;gap:.7rem">
             <label class="pay-method-btn selected" id="pm_nequi" onclick="selectPay('Nequi')" style="display:flex;align-items:center;gap:1rem;padding:1rem 1.2rem;border-radius:var(--radius-sm);border:2px solid var(--gold-z);background:var(--gold-soft);cursor:pointer;transition:.3s">
               <input type="radio" name="pay" value="Nequi" checked style="display:none">
-              <span style="font-size:1.6rem">📲</span>
+              
               <div><b style="font-size:.95rem">Nequi</b><br><small style="color:var(--muted-z);font-size:.78rem">Transferencia al ${pm.nequi||'—'}</small></div>
             </label>
             <label class="pay-method-btn" id="pm_bancolombia" onclick="selectPay('Bancolombia')" style="display:flex;align-items:center;gap:1rem;padding:1rem 1.2rem;border-radius:var(--radius-sm);border:2px solid var(--line);background:transparent;cursor:pointer;transition:.3s">
               <input type="radio" name="pay" value="Bancolombia" style="display:none">
-              <span style="font-size:1.6rem">🏦</span>
+              
               <div><b style="font-size:.95rem">Bancolombia</b><br><small style="color:var(--muted-z);font-size:.78rem">Cta ${bc.tipo||'Ahorros'} · ${bc.numero||'—'}</small></div>
             </label>
             <label class="pay-method-btn" id="pm_efectivo" onclick="selectPay('Efectivo contra entrega')" style="display:flex;align-items:center;gap:1rem;padding:1rem 1.2rem;border-radius:var(--radius-sm);border:2px solid var(--line);background:transparent;cursor:pointer;transition:.3s">
               <input type="radio" name="pay" value="Efectivo contra entrega" style="display:none">
-              <span style="font-size:1.6rem">💵</span>
+              
               <div><b style="font-size:.95rem">Efectivo contra entrega</b><br><small style="color:var(--muted-z);font-size:.78rem">Pagas al recibir tu pedido</small></div>
             </label>
           </div>
@@ -1348,7 +1370,7 @@ function viewCheckout(){
         <div class="sum-row" style="display:flex;justify-content:space-between;font-size:.88rem;color:var(--muted)"><span>Envío</span><span>${t.ship===0?'Gratis':money(t.ship)}</span></div>
         <div class="sum-total" style="display:flex;justify-content:space-between;font-size:1.4rem;font-weight:700;color:var(--gold-z);border-top:1px solid var(--line);padding-top:.8rem;margin-top:.6rem;font-family:var(--serif)"><span>Total</span><span>${money(t.total)}</span></div>
         <button class="btn btn-primary btn-block" style="margin-top:1.5rem;padding:1rem" onclick="placeOrder()">CONFIRMAR PEDIDO</button>
-        <p style="font-size:.72rem;color:var(--muted-z);text-align:center;margin-top:.8rem">🔒 Tus datos están seguros. Al confirmar aceptas nuestros términos.</p>
+        <p style="font-size:.72rem;color:var(--muted-z);text-align:center;margin-top:.8rem">Tus datos están seguros. Al confirmar aceptas nuestros términos.</p>
       </div>
     </div>
   </div></div>`;
@@ -1437,10 +1459,10 @@ function generateInvoiceHtml(num, info){
     <div style="background:#242424;border-radius:12px;padding:16px 20px;margin-bottom:18px;border:1px solid rgba(201,168,76,.1)">
       <p style="margin:0 0 10px;font-size:11px;font-weight:700;color:#C9A84C;text-transform:uppercase;letter-spacing:.1em">Datos de envío</p>
       <p style="margin:2px 0;font-size:15px;font-weight:600;color:#F5F0E8">${info.name}</p>
-      ${info.address?`<p style="margin:4px 0;font-size:13px;color:#8A8070">📦 ${info.address}${info.city?', '+info.city:''}</p>`:''}
-      ${info.delivDate?`<p style="margin:4px 0;font-size:13px;color:#8A8070">📅 ${fmtDate(info.delivDate)}${info.delivTime?' a las '+info.delivTime:''}</p>`:''}
-      ${info.receiver?`<p style="margin:4px 0;font-size:13px;color:#8A8070">👥 Recibe: ${info.receiver}</p>`:''}
-      ${info.card?`<p style="margin:12px 0 0;font-size:13px;color:#C9A84C;font-style:italic">💌 "${info.card}"</p>`:''}
+      ${info.address?`<p style="margin:4px 0;font-size:13px;color:#8A8070">${info.address}${info.city?', '+info.city:''}</p>`:''}
+      ${info.delivDate?`<p style="margin:4px 0;font-size:13px;color:#8A8070">${fmtDate(info.delivDate)}${info.delivTime?' a las '+info.delivTime:''}</p>`:''}
+      ${info.receiver?`<p style="margin:4px 0;font-size:13px;color:#8A8070">Recibe: ${info.receiver}</p>`:''}
+      ${info.card?`<p style="margin:12px 0 0;font-size:13px;color:#C9A84C;font-style:italic"> "${info.card}"</p>`:''}
     </div>
     ${payInfo}
   </div>
@@ -1461,7 +1483,7 @@ async function placeOrder(){
   if(!/^\+?[\d\s\-\(\)]{7,15}$/.test(g('f_phone').replace(/\s/g,''))){toast('El teléfono no es válido (ej: 3001234567)','rose');$('#f_phone')?.focus();return;}
   // Validar que la fecha de entrega sea hoy o en el futuro
   const _hoy=new Date();_hoy.setHours(0,0,0,0);
-  if(new Date(g('f_date')+'T12:00:00')<_hoy){toast('La fecha de entrega debe ser hoy o en el futuro 📅','rose');$('#f_date')?.focus();return;}
+  if(new Date(g('f_date')+'T12:00:00')<_hoy){toast('La fecha de entrega debe ser hoy o en el futuro ','rose');$('#f_date')?.focus();return;}
   const t=cartTotals();
   const method=(document.querySelector('input[name=pay]:checked')||{}).value||'Nequi';
   const items=cart.map(i=>{const p=PRODUCTS.find(x=>x.id===i.id);return {name:p.name,qty:i.qty,price:p.price,id:p.id};});
@@ -1500,13 +1522,13 @@ async function placeOrder(){
     const negName = N.nombre||'ZOLER';
     // Email al cliente
     fetch('/api/send-email',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({to:payload.email,subject:`★ Tu pedido ${num} — ZOLER`,html:htmlFactura})
+      body:JSON.stringify({to:payload.email,subject:`Pedido confirmado ${num} — ${negName}`,html:htmlFactura,replyTo:N.correo||undefined})
     }).catch(()=>{});
-    // Email al admin / dueño de la tienda
+    // Email al admin / dueno de la tienda
     const adminEmail = N.correo;
     if(adminEmail && adminEmail!==payload.email){
       fetch('/api/send-email',{method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({to:adminEmail,subject:`🌸 Nuevo pedido ${num} — ${payload.name}`,html:htmlFactura})
+        body:JSON.stringify({to:adminEmail,subject:`Nuevo pedido ${num} — ${payload.name}`,html:htmlFactura,replyTo:payload.email})
       }).catch(()=>{});
     }
   }
@@ -1526,38 +1548,19 @@ async function placeOrder(){
       return;
     }catch(e){ console.error(e); toast('No se pudo abrir el pago en línea. Te dejamos el pago por transferencia.','rose'); }
   }
-  location.hash='#/confirmacion/'+num;
-}
-
-async function viewConfirmation(num){
-  let info = null;
-  const cached = await Store.get('lastOrderSummary');
-  if(cached && cached.num===num){
-    info = cached;
-  } else {
-    // Fallback: busca en la BD (útil cuando el usuario regresa desde el redirect de Wompi)
-    try{ const dbO=await DB.fetchOrderByNum(num); if(dbO) info=dbO; }catch(e){}
-  }
-  const method = info?info.pay:'';
-  const needsProof = method==='Nequi'||method==='Bancolombia';
-  // Generar texto de factura para WhatsApp
-  const facturaWa = info ? generateInvoiceText(num, info) : `Mi pedido es el número ${num}`;
-  // WA al negocio (para enviar comprobante o confirmar)
   const waNegocio = waLink(facturaWa);
-  // WA para que el CLIENTE se envíe la factura a sí mismo (chat de notas)
   const waClienteSelf = `https://wa.me/?text=${encodeURIComponent(facturaWa)}`;
   const itemsHtml = Array.isArray(info?.items)&&info.items.length
-    ? info.items.map(i=>`<div class="sum-row"><span>${esc(i.name)} ×${i.qty}</span><span>${money(i.price*i.qty)}</span></div>`).join('')
+    ? info.items.map(i=>`<div class="sum-row"><span>${esc(i.name)} \u00d7${i.qty}</span><span>${money(i.price*i.qty)}</span></div>`).join('')
     : (info?.items ? `<div class="sum-row"><span>${esc(String(info.items))}</span></div>` : '');
   const fmtDate=d=>{if(!d)return '';try{const[y,m,dd]=d.split('-');return `${dd}/${m}/${y}`;}catch(e){return d;}};
   return `<div class="wrap block" style="padding-top:calc(var(--header-h) + 3rem)">
     <div class="info-card" style="max-width:640px;margin:0 auto">
       <div style="text-align:center;margin-bottom:1.2rem">
-        <div style="font-size:3.5rem">🌸</div>
         <span class="eyebrow">Pedido recibido</span>
-        <h2 style="font-size:clamp(1.7rem,5vw,2.4rem);margin:.4rem 0">¡Gracias por tu compra!</h2>
-        <p style="color:var(--muted);margin:.5rem 0">${needsProof?'Envíanos el comprobante de pago para comenzar a preparar tu pedido.':'Tu pedido ha sido registrado. Te contactaremos pronto.'}</p>
-        <div class="pill" style="font-size:1rem;margin:1rem auto;display:inline-block"># Pedido: <b>${num}</b></div>
+        <h2 style="font-size:clamp(1.7rem,5vw,2.4rem);margin:.4rem 0">Gracias por tu compra</h2>
+        <p style="color:var(--muted);margin:.5rem 0">${needsProof?'Env\u00edanos el comprobante de pago para comenzar a preparar tu pedido.':'Tu pedido ha sido registrado. Te contactaremos pronto.'}</p>
+        <div class="pill" style="font-size:1rem;margin:1rem auto;display:inline-block">Pedido: <b>${num}</b></div>
       </div>
       ${info?`
       <div style="background:var(--cream-2);border-radius:var(--radius-sm);padding:1.2rem 1rem;margin-bottom:1rem">
@@ -1565,25 +1568,25 @@ async function viewConfirmation(num){
           <span style="font-size:.78rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)">Datos de entrega</span>
         </div>
         <div class="sum-row"><span>Cliente</span><b>${esc(info.name)}</b></div>
-        ${info.address?`<div class="sum-row"><span>Dirección</span><b>${esc(info.address)}, ${esc(info.city||'')}</b></div>`:''}
-        ${info.delivDate?`<div class="sum-row"><span>Fecha</span><b>${fmtDate(info.delivDate)}${info.delivTime?' a las '+info.delivTime:''}</b></div>`:''}
+        ${info.address?`<div class="sum-row"><span>Direcci\u00f3n</span><b>${esc(info.address)}, ${esc(info.city||'')}</b></div>`:''}
+        ${info.delivDate?`<div class="sum-row"><span>Fecha de entrega</span><b>${fmtDate(info.delivDate)}${info.delivTime?' a las '+info.delivTime:''}</b></div>`:''}
         ${info.receiver?`<div class="sum-row"><span>Recibe</span><b>${esc(info.receiver)}</b></div>`:''}
-        ${info.card?`<div class="sum-row"><span>Tarjeta 💌</span><i style="color:var(--rose-deep)">${esc(info.card)}</i></div>`:''}
+        ${info.card?`<div class="sum-row"><span>Mensaje en tarjeta</span><i style="color:var(--rose-deep)">${esc(info.card)}</i></div>`:''}
       </div>
       ${itemsHtml?`<div style="background:var(--cream-2);border-radius:var(--radius-sm);padding:1.2rem 1rem;margin-bottom:1rem">
         <div style="font-size:.78rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:.7rem">Productos</div>
         ${itemsHtml}
         <div class="divider"></div>
-        ${info.disc?`<div class="sum-row" style="color:var(--rose-deep)"><span>Descuento</span><span>−${money(info.disc)}</span></div>`:''}
-        <div class="sum-row"><span>Envío</span><span>${info.ship===0?'Gratis':money(info.ship||0)}</span></div>
+        ${info.disc?`<div class="sum-row" style="color:var(--rose-deep)"><span>Descuento</span><span>\u2212${money(info.disc)}</span></div>`:''}
+        <div class="sum-row"><span>Env\u00edo</span><span>${info.ship===0?'Gratis':money(info.ship||0)}</span></div>
         <div class="sum-row total"><span>Total</span><span>${money(info.total)}</span></div>
-      </div>`:''}
+      </div>`:``}
       ${needsProof?payManualInfo(method):''}
-      <p style="font-size:.78rem;color:var(--muted);text-align:center;margin:.4rem 0 0">📧 Enviamos la factura a <b>${esc(info.email||'tu correo')}</b></p>
-      `:'<p style="color:var(--muted);text-align:center">No encontramos el resumen de tu pedido. Guarda el número de pedido para consultarlo.</p>'}
+      <p style="font-size:.78rem;color:var(--muted);text-align:center;margin:.4rem 0 0">Enviamos la factura a <b>${esc(info.email||'tu correo')}</b></p>
+      `:'<p style="color:var(--muted);text-align:center">No encontramos el resumen de tu pedido. Guarda el n\u00famero de pedido para consultarlo.</p>'}
       <div style="display:flex;gap:.6rem;justify-content:center;margin-top:1.4rem;flex-wrap:wrap">
-        ${needsProof?`<a id="waConfirm" href="${waNegocio}" target="_blank" class="btn btn-rose">📱 Enviar comprobante de pago</a>`:''}
-        <a href="${waClienteSelf}" target="_blank" class="btn btn-ghost btn-sm">💬 Guardar factura en WhatsApp</a>
+        ${needsProof?`<a id="waConfirm" href="${waNegocio}" target="_blank" class="btn btn-rose">Enviar comprobante de pago</a>`:''}
+        <a href="${waClienteSelf}" target="_blank" class="btn btn-ghost btn-sm">Guardar factura en WhatsApp</a>
         <a href="#/catalogo" class="btn btn-primary">Seguir comprando</a>
       </div>
     </div>
@@ -1598,16 +1601,16 @@ function viewFAQ(){
 }
 function viewBlog(){
   return `<div class="wrap block" style="padding-top:calc(var(--header-h) + 2.4rem)">
-    <div class="sec-head"><div><span class="eyebrow">Diario floral</span><h2>Blog & consejos</h2><p>Ideas, cuidados y todo el mundo de las flores.</p></div></div>
-    <div class="blog-grid">${BLOG.map((b,i)=>`<article class="post"><div class="ph"><svg viewBox="0 0 200 120" style="width:100%;height:100%"><rect width="200" height="120" fill="${b.hue}" opacity=".25"/>${Array.from({length:5}).map((_,j)=>`<circle cx="${30+j*36}" cy="60" r="18" fill="${b.hue}" opacity="${.3+j*.1}"/>`).join('')}</svg></div><div class="pb"><small>${b.c}</small><h3>${b.t}</h3><p style="color:var(--muted);font-size:.9rem">${b.x}</p><button onclick="readPost(${i})" style="background:none;color:var(--accent);font-size:.85rem;font-weight:500;margin-top:.6rem;padding:0;cursor:pointer">Leer más →</button></div></article>`).join('')}</div>
+    <div class="sec-head"><div><span class="eyebrow">Diario floral</span><h2>Blog &amp; consejos</h2><p>Ideas, cuidados y todo el mundo de las flores.</p></div></div>
+    <div class="blog-grid">${BLOG.map((b,i)=>`<article class="post"><div class="ph"><svg viewBox="0 0 200 120" style="width:100%;height:100%"><rect width="200" height="120" fill="${b.hue}" opacity=".25"/>${Array.from({length:5}).map((_,j)=>`<circle cx="${30+j*36}" cy="60" r="18" fill="${b.hue}" opacity="${.3+j*.1}"/>`).join('')}</svg></div><div class="pb"><small>${b.c}</small><h3>${b.t}</h3><p style="color:var(--muted);font-size:.9rem">${b.x}</p><button onclick="readPost(${i})" style="background:none;color:var(--accent);font-size:.85rem;font-weight:500;margin-top:.6rem;padding:0;cursor:pointer">Leer m\u00e1s \u2192</button></div></article>`).join('')}</div>
   </div>`;
 }
 function readPost(i){
   const b=BLOG[i]; if(!b)return;
   openModal(`<div style="padding:2rem 2.2rem"><span class="eyebrow">${b.c}</span><h2 style="font-size:2rem;margin:.4rem 0 1rem">${esc(b.t)}</h2>
     <p style="color:var(--muted);margin-bottom:1rem">${esc(b.x)}</p>
-    <p style="color:var(--muted)">En ${esc(N.nombre||'Flor & Alma')} cuidamos cada detalle para que tus flores luzcan y duren al máximo. Si quieres asesoría personalizada para elegir el arreglo perfecto, escríbenos por WhatsApp y con gusto te ayudamos.</p>
-    <a href="${waLink('¡Hola! Vi el artículo "'+b.t+'" y quiero más información 🌸')}" target="_blank" class="btn btn-primary btn-sm" style="margin-top:1.2rem">Escribir por WhatsApp</a></div>`);
+    <p style="color:var(--muted)">En ${esc(N.nombre||'ZOLER')} cuidamos cada detalle para que tus flores luzcan y duren al máximo. Si quieres asesoría personalizada para elegir el arreglo perfecto, escríbenos por WhatsApp y con gusto te ayudamos.</p>
+    <a href="${waLink('Hola, vi el artículo \"'+b.t+'\" y quiero más información.')}" target="_blank" class="btn btn-primary btn-sm" style="margin-top:1.2rem">Escribir por WhatsApp</a></div>`);
 }
 
 /* ============================================================
@@ -1618,9 +1621,9 @@ async function viewAdmin(){
   if(!adminAuthed && DB.online()) adminAuthed = await DB.session();
   if(!adminAuthed){
     return `<div class="admin-login"><div class="box">
-      <div style="font-size:3rem">🌿</div>
+      <div style="width:60px;height:60px;background:var(--gold-soft);border:1px solid rgba(201,168,76,.3);border-radius:50%;margin:0 auto .8rem;display:flex;align-items:center;justify-content:center"><span style="font-family:var(--serif);font-size:2rem;font-weight:700;color:var(--gold-z)">Z</span></div>
       <h2 style="font-size:1.8rem;margin:.4rem 0">Panel de administración</h2>
-      <p style="color:var(--muted);font-size:.88rem;margin-bottom:1.2rem">Acceso privado · ${esc(N.nombre||'Flor & Alma')}</p>
+      <p style="color:var(--muted);font-size:.88rem;margin-bottom:1.2rem">Acceso privado · ${esc(N.nombre||'ZOLER')}</p>
       ${DB.online()?`<div class="fgroup"><input id="adEmail" type="email" placeholder="Correo de administrador" onkeydown="if(event.key==='Enter')adminLogin()"></div>`:''}
       <div class="fgroup"><input id="adPass" type="password" placeholder="Contraseña" onkeydown="if(event.key==='Enter')adminLogin()"></div>
       <button class="btn btn-primary btn-block" onclick="adminLogin()">Ingresar</button>
@@ -1629,10 +1632,10 @@ async function viewAdmin(){
   }
   return `<div class="admin-shell">
     <aside class="admin-side">
-      <div class="logo">${esc(N.nombre||'Flor & Alma')}</div>
-      ${[['dashboard','📊 Resumen'],['orders','🧾 Pedidos'],['products','🌹 Productos'],['inventory','📦 Inventario']].map(t=>`<a href="#" class="${adminTab===t[0]?'active':''}" onclick="adminGo('${t[0]}');return false">${t[1]}</a>`).join('')}
+      <div class="logo">${esc(N.nombre||'ZOLER')}</div>
+      ${[['dashboard','Resumen'],['orders','Pedidos'],['products','Productos'],['inventory','Inventario']].map(t=>`<a href="#" class="${adminTab===t[0]?'active':''}" onclick="adminGo('${t[0]}');return false">${t[1]}</a>`).join('')}
       <a href="#/" style="margin-top:1rem">← Volver a la tienda</a>
-      <a href="#" onclick="adminLogout();return false">⎋ Salir</a>
+      <a href="#" onclick="adminLogout();return false">Salir</a>
     </aside>
     <div class="admin-main" id="adminMain"></div>
   </div>`;
@@ -1642,7 +1645,7 @@ async function adminLogin(){
   const email=$('#adEmail')?$('#adEmail').value.trim():'';
   try{
     const ok = await DB.login(email,pass);
-    if(ok){ adminAuthed=true; render(); toast('Bienvenido de vuelta 🌿'); }
+    if(ok){ adminAuthed=true; render(); toast('Bienvenido de vuelta'); }
     else toast('Credenciales incorrectas','rose');
   }catch(e){ toast('Credenciales incorrectas','rose'); }
 }
@@ -1657,7 +1660,7 @@ async function renderAdminMain(){
     const rev=orders.filter(o=>o.state!=='Cancelado').reduce((s,o)=>s+(o.total||0),0);
     const pend=orders.filter(o=>o.state==='Pendiente').length;
     const lowStock=PRODUCTS.filter(p=>p.stock>0&&p.stock<=5).length;
-    el.innerHTML=`<div class="admin-head"><h2>Resumen</h2><div><button class="btn btn-ghost btn-sm" onclick="seedDB()">🌱 Cargar Productos Prueba</button> <span class="pill">🟢 En tiempo real</span></div></div>
+    el.innerHTML=`<div class="admin-head"><h2>Resumen</h2><div><button class="btn btn-ghost btn-sm" onclick="seedDB()">Cargar productos de prueba</button> <span class="pill">En tiempo real</span></div></div>
       <div class="kpis">
         <div class="kpi"><small>Pedidos totales</small><b>${orders.length}</b></div>
         <div class="kpi"><small>Ventas acumuladas</small><b>${money(rev)}</b></div>
@@ -1673,7 +1676,7 @@ async function renderAdminMain(){
     const showArchived = window.adminOrderTab === 'archived';
     const list = showArchived ? archivados : activos;
     
-    el.innerHTML=`<div class="admin-head"><h2>Pedidos</h2><div><button class="btn btn-ghost btn-sm" onclick="exportOrdersCSV()">⬇ Exportar CSV</button> <span class="pill">${orders.length} pedidos</span></div></div>
+    el.innerHTML=`<div class="admin-head"><h2>Pedidos</h2><div><button class="btn btn-ghost btn-sm" onclick="exportOrdersPDF()" style="margin-right:.4rem">Exportar PDF</button><button class="btn btn-ghost btn-sm" onclick="exportOrdersCSV()">Exportar Excel</button> <span class="pill">${orders.length} pedidos</span></div></div>
       <div style="margin-bottom:1.4rem;display:flex;gap:.5rem;border-bottom:1px solid var(--line);padding-bottom:.8rem">
         <button class="btn ${!showArchived?'btn-gold':'btn-ghost'} btn-sm" onclick="window.adminOrderTab='active';renderAdminMain()">Activos (${activos.length})</button>
         <button class="btn ${showArchived?'btn-gold':'btn-ghost'} btn-sm" onclick="window.adminOrderTab='archived';renderAdminMain()">Archivados (${archivados.length})</button>
@@ -1715,12 +1718,12 @@ function exportOrdersCSV(){
   a.download='pedidos-floryalma.csv'; a.click();
 }
 function ordersTable(list){
-  if(!list.length) return `<div class="empty"><span class="em">🗂️</span>Aún no hay pedidos.</div>`;
+  if(!list.length) return `<div class="empty"><p style="margin-top:.5rem;color:var(--muted)">Sin pedidos en esta seccion.</p></div>`;
   const states=['Pendiente','Confirmado','Preparando','En camino','Entregado','Cancelado'];
-  return `<div style="overflow-x:auto"><table><thead><tr><th>Pedido</th><th>Cliente</th><th>Entrega</th><th>Productos</th><th>Notas & Tarjeta</th><th>Pago</th><th>Estado</th><th>Fecha</th></tr></thead><tbody>
+  return `<div style="overflow-x:auto"><table><thead><tr><th>Pedido</th><th>Cliente</th><th>Entrega</th><th>Productos</th><th>Notas &amp; Tarjeta</th><th>Pago</th><th>Estado</th><th>Fecha</th></tr></thead><tbody>
     ${list.map(o=>{const paid=(o.payStatus||'').toLowerCase().includes('pag');return `<tr>
       <td><b>${o.num}</b></td>
-      <td>${esc(o.name)}<br><small>${esc(o.phone)}<br>${esc(o.email)}</small><br><a href="https://wa.me/${(o.phone||'').replace(/\D/g,'')}?text=${encodeURIComponent('Hola '+o.name+', te escribo por tu pedido '+o.num+' 🌸')}" target="_blank" style="font-size:.72rem;color:#25D366">✆ WhatsApp Cliente</a></td>
+      <td>${esc(o.name)}<br><small>${esc(o.phone)}<br>${esc(o.email)}</small><br><a href="https://wa.me/${(o.phone||'').replace(/\D/g,'')}?text=${encodeURIComponent('Hola '+o.name+', le escribo por su pedido '+o.num)}" target="_blank" style="font-size:.72rem;color:#25D366">Escribir por WhatsApp</a></td>
       <td><small style="color:var(--gold-z)"><b>${esc(o.delivDate||'')} ${esc(o.delivTime||'')}</b></small><br><small>${esc(o.addr||'')}, ${esc(o.city||'')}</small><br><small style="color:var(--muted)">Recibe: ${esc(o.receiver||'El cliente')}</small></td>
       <td><small>${(o.items||[]).map(i=>esc(i.name)+' ×'+i.qty).join('<br>')}</small></td>
       <td><small style="color:var(--muted)"><b>Notas:</b> ${esc(o.notes||'--')}<br><b>Tarjeta:</b> <i style="color:var(--text)">"${esc(o.card||'--')}"</i></small></td>
@@ -1730,12 +1733,12 @@ function ordersTable(list){
     </tr>`;}).join('')}
   </tbody></table></div>`;
 }
-async function markPaid(num){ await DB.setPayStatus(num,'Pagado'); renderAdminMain(); toast('Pago marcado ✓'); }
+async function markPaid(num){ await DB.setPayStatus(num,'Pagado'); renderAdminMain(); toast('Pago marcado como recibido'); }
 async function setOrderState(num,state){ await DB.setOrderState(num,state); renderAdminMain(); }
 async function setStock(id,val){
   const p=PRODUCTS.find(x=>x.id===id); if(p){p.stock=Math.max(0,parseInt(val)||0);
     try{ await DB.setStock(id,p.stock); }catch(e){toast('No se pudo actualizar','rose');}
-    if(p.stock<=5&&p.stock>0) toast(`⚠️ Bajo inventario: ${p.name} (${p.stock})`,'gold'); }
+    if(p.stock<=5&&p.stock>0) toast(`Bajo inventario: ${p.name} (${p.stock} unidades)`,'gold'); }
 }
 async function delProduct(id){
   if(!confirm('¿Eliminar este producto?'))return;
@@ -1809,7 +1812,7 @@ async function saveProduct(pid,exists){
   if(exists==='true'||exists===true){ prod=PRODUCTS.find(x=>x.id===pid); Object.assign(prod,data); }
   else { prod={rating:5,reviews:0,tags:[],care:['Cambia el agua cada 2 días','Recorta los tallos en diagonal'],dur:'7 días',...data}; PRODUCTS.unshift(prod); }
   try{ await DB.upsertProduct(prod); }catch(e){ console.error(e); toast('No se pudo guardar en la base de datos','rose'); return; }
-  closeModal(); renderAdminMain(); toast('Producto guardado 🌿');
+  closeModal(); renderAdminMain(); toast('Producto guardado correctamente');
 }
 
 /* Aviso sonoro sintetizado (dos tonos suaves) */
@@ -1833,8 +1836,12 @@ function startOrderWatch(){
     if(orderChannel) return; // ya suscrito
     orderChannel = DB.watchOrders(newOrder=>{
       beep();
-      toast('🔔 ¡Nuevo pedido! '+(newOrder.order_num||''),'gold');
+      toast('Nuevo pedido recibido: '+(newOrder.order_num||''),'gold');
       if(adminAuthed && (adminTab==='orders'||adminTab==='dashboard')) renderAdminMain();
+    });
+    // Actualizar catalogo en tiempo real cuando cambien productos
+    DB.watchProducts(()=>{
+      DB.fetchProducts().then(p=>{ if(p&&p.length){ PRODUCTS=p; if($('#results')) renderResults(); }});
     });
     if(orderPoll) clearInterval(orderPoll);
     orderPoll = setInterval(()=>{
@@ -1850,7 +1857,7 @@ function startOrderWatch(){
     if(last && last!==lastSeenOrder){
       if(lastSeenOrder!==null){
         beep();
-        toast('🔔 ¡Nuevo pedido recibido! '+last,'gold');
+        toast('Nuevo pedido recibido: '+last,'gold');
         if(adminTab==='orders'||adminTab==='dashboard') renderAdminMain();
       }
       lastSeenOrder=last;
@@ -1882,9 +1889,9 @@ $('#themeBtn').onclick=async()=>{
   document.documentElement.setAttribute('data-theme',next);
   setThemeIcon(next); await Store.set('theme',next);
 };
-function waLink(text){return `https://wa.me/${CONTACT.phone}?text=${encodeURIComponent(text||'¡Hola! Quiero información sobre sus flores 🌸')}`;}
+function waLink(text){return `https://wa.me/${CONTACT.phone}?text=${encodeURIComponent(text||'Hola, quiero información sobre sus arreglos florales.')}`;}
 $('#waFloat').href=waLink();
-$('#chatBtn').onclick=()=>{openModal(`<div style="padding:2rem;text-align:center"><div style="font-size:3rem">💬</div><h2 style="font-size:1.8rem;margin:.4rem 0">Atención al cliente</h2><p style="color:var(--muted);margin-bottom:1.2rem">Estamos para ayudarte a elegir el detalle perfecto. Escríbenos y te respondemos al instante.</p><a href="${waLink()}" target="_blank" class="btn btn-primary">Chatear por WhatsApp</a></div>`);};
+$('#chatBtn').onclick=()=>{openModal(`<div style="padding:2rem;text-align:center"><h2 style="font-size:1.8rem;margin:.4rem 0">Atención al cliente</h2><p style="color:var(--muted);margin-bottom:1.2rem">Estamos para ayudarte a elegir el detalle perfecto. Escríbenos y te respondemos al instante.</p><a href="${waLink()}" target="_blank" class="btn btn-primary">Chatear por WhatsApp</a></div>`);};
 
 /* Menú móvil */
 $('#burger').onclick=()=>$('#nav').classList.toggle('open');
@@ -1969,10 +1976,10 @@ async function subscribeNews(){
   </div>
 </div></body></html>`;
   fetch('/api/send-email',{method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({to:v,subject:`★ Bienvenido a ${negName}`,html:welcomeHtml})
+    body:JSON.stringify({to:v,subject:`Bienvenido a ${negName}`,html:welcomeHtml})
   }).then(async r => {
     const data = await r.json().catch(()=>({}));
-    if(!r.ok || !data.ok) toast('Error en correo: ' + (data.error || data.reason || 'Desconocido'), 'rose');
+    if(!r.ok || !data.ok) toast('console.warn('email no enviado:',' + (data.error || data.reason || 'Desconocido'), 'rose');
     else toast('¡Listo! Revisa tu correo ✔', 'gold');
   }).catch(e=>{
     toast('Error local: estás probando fuera de Vercel', 'rose');
@@ -2040,17 +2047,46 @@ function selectPay(method){
 }
 
 async function seedDB(){
-  if(!confirm('¿Cargar 12 productos de prueba en tu tienda?')) return;
-  toast('Cargando... por favor espera', 'gold');
+  if(!confirm('¿Cargar 12 productos de prueba?')) return;
+  toast('Cargando productos...', 'gold');
   try {
     for(const p of SEED_PRODUCTS) {
       await sb.from('products').upsert(productToRow(p));
     }
-    toast('¡Productos cargados con éxito!', 'gold');
-    setTimeout(()=>location.reload(), 1000);
+    toast('Productos cargados correctamente.', 'gold');
+    setTimeout(()=>location.reload(), 1200);
   } catch(e) {
-    toast('Error al cargar productos: '+e.message, 'rose');
+    toast('Error al cargar: '+e.message, 'rose');
   }
+}
+
+function exportOrdersPDF(){
+  const tab = window.adminOrderTab === 'archived'
+    ? ORDERS_CACHE.filter(o=>o.state==='Entregado'||o.state==='Cancelado')
+    : ORDERS_CACHE.filter(o=>o.state!=='Entregado'&&o.state!=='Cancelado');
+  const titulo = window.adminOrderTab === 'archived' ? 'Pedidos Archivados' : 'Pedidos Activos';
+  const rows = tab.map(o=>`<tr>
+    <td><b>${o.num}</b></td>
+    <td>${o.name}<br><small>${o.phone}<br>${o.email}</small></td>
+    <td>${o.delivDate||''} ${o.delivTime||''}<br>${o.addr||''}, ${o.city||''}<br>Recibe: ${o.receiver||'El cliente'}</td>
+    <td>${(o.items||[]).map(i=>i.name+' x'+i.qty).join('<br>')}</td>
+    <td><b>Notas:</b> ${o.notes||'--'}<br><b>Tarjeta:</b> <i>${o.card||'--'}</i></td>
+    <td><b>$${Number(o.total||0).toLocaleString('es-CO')}</b><br>${o.pay||''}</td>
+    <td>${o.state||''}</td>
+    <td>${new Date(o.date).toLocaleDateString('es-CO')}</td>
+  </tr>`).join('');
+  const win=window.open('','_blank');
+  win.document.write(`<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">
+    <title>${titulo} — ZOLER</title>
+    <style>body{font-family:'Segoe UI',Arial,sans-serif;font-size:10px;margin:0;padding:15mm}h1{font-size:16px;margin-bottom:4px}h2{font-size:11px;color:#666;margin-bottom:12px;font-weight:400}table{width:100%;border-collapse:collapse}th,td{border:1px solid #ccc;padding:5px 7px;text-align:left;vertical-align:top}th{background:#f0f0f0;font-weight:600;font-size:9px;text-transform:uppercase}tr:nth-child(even) td{background:#fafafa}small{color:#666;display:block;font-size:8px}i{color:#444}</style>
+    </head><body>
+    <h1>ZOLER — ${titulo}</h1>
+    <h2>Generado: ${new Date().toLocaleString('es-CO')}</h2>
+    <table><thead><tr><th>Pedido</th><th>Cliente</th><th>Entrega</th><th>Productos</th><th>Notas / Tarjeta</th><th>Total / Pago</th><th>Estado</th><th>Fecha</th></tr></thead>
+    <tbody>${rows}</tbody></table>
+    <script>window.print();window.onafterprint=()=>window.close();<\/script>
+    </body></html>`);
+  win.document.close();
 }
 
 (async function(){
@@ -2064,7 +2100,7 @@ async function seedDB(){
 /* Exponer funciones usadas en atributos onclick */
 Object.assign(window,{addToCart,buyNow,setQty,removeFromCart,clearCart,toggleFav,applyCoupon,openCart,closeCart,
   toggleFilter,resetFilters,toggleFilters,renderResults,setMaxPrice,setAvailOnly,zoomImg,setRating,submitReview,placeOrder,adminLogin,adminLogout,adminGo,renderAdminMain,
-  setOrderState,setStock,delProduct,editProduct,saveProduct,openModal,closeModal,togglePayInfo,markPaid,exportOrdersCSV,subscribeNews,readPost,selectPay,initScrollReveal,previewAdminImg});
+  setOrderState,setStock,delProduct,editProduct,saveProduct,openModal,closeModal,togglePayInfo,markPaid,exportOrdersCSV,exportOrdersPDF,seedDB,subscribeNews,readPost,selectPay,initScrollReveal,previewAdminImg});
 </script>
 </body>
 </html>
