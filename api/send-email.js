@@ -8,7 +8,9 @@
  *                      Si no tienes dominio propio usa: onboarding@resend.dev
  */
 module.exports = async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  // CORS: restringir al dominio de producción
+  const allowed = process.env.ALLOWED_ORIGIN || '*';
+  res.setHeader('Access-Control-Allow-Origin', allowed);
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   if (req.method === 'OPTIONS') return res.status(200).end();
@@ -21,9 +23,24 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    const { to, subject, html, replyTo } = req.body;
+    const { to, subject, html, replyTo } = req.body || {};
     if (!to || !subject || !html) {
       return res.status(400).json({ error: 'Faltan campos requeridos: to, subject, html' });
+    }
+
+    // Validar que el destinatario sea un correo con formato válido
+    if (typeof to !== 'string' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to)) {
+      return res.status(400).json({ error: 'El campo "to" no es un correo válido' });
+    }
+
+    // Limitar tamaño del HTML para prevenir abuso (máx 200 KB)
+    if (typeof html !== 'string' || html.length > 200000) {
+      return res.status(400).json({ error: 'El campo "html" es demasiado grande o inválido' });
+    }
+
+    // Limitar tamaño del asunto
+    if (typeof subject !== 'string' || subject.length > 200) {
+      return res.status(400).json({ error: 'El campo "subject" es demasiado largo' });
     }
 
     const from = process.env.RESEND_FROM || 'onboarding@resend.dev';
@@ -34,7 +51,9 @@ module.exports = async function handler(req, res) {
       subject,
       html,
     };
-    if (replyTo) payload.reply_to = replyTo;
+    if (replyTo && typeof replyTo === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(replyTo)) {
+      payload.reply_to = replyTo;
+    }
 
     const r = await fetch('https://api.resend.com/emails', {
       method: 'POST',
