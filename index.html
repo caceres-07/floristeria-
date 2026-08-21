@@ -456,7 +456,7 @@ html[data-theme="light"] .pay-method-btn:hover,.pay-method-btn.selected{backgrou
   .cat-grid,.gallery{grid-template-columns:repeat(2,1fr)}
 }
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto}}
-/* ---------- Estilos de impresion (PDF de pedidos) ---------- */
+/* ---------- Estilos de impresión (PDF de pedidos) ---------- */
 @media print{
   body{background:#fff!important;color:#000!important;font-family:'Segoe UI',Arial,sans-serif;font-size:11px}
   .site,footer.site,.admin-side,#toasts,.wa-float,.chat-btn,.modal,.overlay,.drawer,.admin-head .btn{display:none!important}
@@ -542,6 +542,13 @@ input,select,textarea{touch-action:manipulation}
   .checkout-grid{grid-template-columns:1fr !important}
   .order-sticky{position:static !important}
 }
+
+/* Footer adaptado a modo claro */
+footer.site{background:var(--obsidian);color:var(--ivory-z)}
+footer.site h4{color:var(--gold-z)}
+footer.site a{color:var(--muted-z)}
+footer.site a:hover{color:var(--gold-z)}
+footer.site .fbot{border-top:1px solid rgba(201,168,76,.12);color:var(--muted-z)}
 </style>
 </head>
 <body>
@@ -599,7 +606,7 @@ input,select,textarea{touch-action:manipulation}
     <div class="cols">
       <div>
         <h4 id="fBrand" style="font-family:var(--serif);font-size:1.8rem;letter-spacing:.18em">ZOLER</h4>
-        <p style="color:#4A4035;font-size:.88rem;max-width:260px;line-height:1.7;margin-top:.4rem">Diseñado para Sorprender. Flores y arreglos de autor con envío a toda Colombia.</p>
+        <p style="color:var(--muted);font-size:.88rem;max-width:260px;line-height:1.7;margin-top:.4rem">Diseñado para Sorprender. Flores y arreglos de autor con envío a toda Colombia.</p>
         <div class="newsletter" style="margin-top:1rem">
           <input id="newsEmail" type="email" placeholder="Tu correo para novedades" />
           <button class="btn btn-gold btn-sm" onclick="subscribeNews()">Suscribir</button>
@@ -626,14 +633,14 @@ input,select,textarea{touch-action:manipulation}
       <div>
         <h4>Contacto</h4>
         <ul id="fContact"></ul>
-        <div style="display:flex;gap:.5rem;margin-top:.8rem;font-size:.74rem;flex-wrap:wrap;color:#4A4035;letter-spacing:.06em">
+        <div style="display:flex;gap:.5rem;margin-top:.8rem;font-size:.74rem;flex-wrap:wrap;color:var(--muted);letter-spacing:.06em">
           <span>Nequi</span>·<span>Bancolombia</span>·<span>PSE</span>·<span>Tarjetas</span>
         </div>
       </div>
     </div>
     <div class="fbot">
       <span id="fCopy">© ZOLER. Todos los derechos reservados.</span>
-      <span style="letter-spacing:.06em">DISEÑADO PARA SORPRENDER ✦</span>
+      <span style="letter-spacing:.06em;color:var(--muted)">DISEÑADO PARA SORPRENDER ✦</span>
     </div>
   </div>
 </footer>
@@ -666,7 +673,7 @@ input,select,textarea{touch-action:manipulation}
 const Store = (()=> {
   const hasArtifact = typeof window !== 'undefined' && window.storage && typeof window.storage.get === 'function';
   const mem = {};
-  const K = 'floralma_';
+  const K = 'zoler_';
   return {
     async get(key){
       try{
@@ -856,7 +863,7 @@ const FAQS = [
   {q:'¿Hacen entregas el mismo día?',a:'Sí. Los pedidos confirmados antes de la 1:00 p. m. se entregan el mismo día dentro de la ciudad. Fuera de ese horario, se programan para el día siguiente.'},
   {q:'¿A qué ciudades llegan?',a:'Realizamos entregas en toda la ciudad y municipios cercanos. En el checkout puedes indicar tu barrio y calcularemos la cobertura.'},
   {q:'¿Puedo incluir una tarjeta con mensaje?',a:'Por supuesto. En el proceso de compra encontrarás un campo para escribir un mensaje personalizado que incluiremos gratis en una tarjeta.'},
-  {q:'¿Qué métodos de pago aceptan?',a:'Nequi, Daviplata, PSE, tarjetas débito y crédito, transferencia bancaria y pago en efectivo contra entrega.'},
+  {q:'¿Qué métodos de pago aceptan?',a:'Nequi, DaviPlata, PSE, tarjetas de débito y crédito, transferencia bancaria y pago en efectivo contra entrega.'},
   {q:'¿Las flores son iguales a las fotos?',a:'Trabajamos con flor fresca de temporada. La composición y los colores se respetan al máximo, aunque alguna variedad puede sustituirse por otra de igual o mayor valor según disponibilidad.'},
 ];
 
@@ -980,7 +987,7 @@ function renderCart(){
   const t=cartTotals();
   foot.innerHTML=`
     <div class="coupon-row"><input id="couponIn" placeholder="Código de cupón" value="${appliedCoupon||''}"><button class="btn btn-ghost btn-sm" onclick="applyCoupon()">Aplicar</button></div>
-    ${appliedCoupon?`<div class="pill" style="margin-bottom:.6rem">🎟️ ${COUPONS[appliedCoupon].label} activo</div>`:''}
+    ${appliedCoupon?`<div class="pill" style="margin-bottom:.6rem">${COUPONS[appliedCoupon].label} activo</div>`:''}
     <div class="sum-row"><span>Subtotal</span><span>${money(t.sub)}</span></div>
     ${t.disc?`<div class="sum-row" style="color:var(--rose-deep)"><span>Descuento</span><span>−${money(t.disc)}</span></div>`:''}
     <div class="sum-row"><span>Envío</span><span>${t.ship===0?'Gratis':money(t.ship)}</span></div>
@@ -1368,7 +1375,7 @@ function viewCheckout(){
         <div class="sum-row" style="display:flex;justify-content:space-between;font-size:.88rem;color:var(--muted)"><span>Envío</span><span>${t.ship===0?'Gratis':money(t.ship)}</span></div>
         <div class="sum-total" style="display:flex;justify-content:space-between;font-size:1.4rem;font-weight:700;color:var(--gold-z);border-top:1px solid var(--line);padding-top:.8rem;margin-top:.6rem;font-family:var(--serif)"><span>Total</span><span>${money(t.total)}</span></div>
         <button class="btn btn-primary btn-block" style="margin-top:1.5rem;padding:1rem" onclick="placeOrder()">CONFIRMAR PEDIDO</button>
-        <p style="font-size:.72rem;color:var(--muted-z);text-align:center;margin-top:.8rem">🔒 Tus datos están seguros. Al confirmar aceptas nuestros términos.</p>
+        <p style="font-size:.72rem;color:var(--muted-z);text-align:center;margin-top:.8rem">Tus datos están seguros. Al confirmar aceptas nuestros términos.</p>
       </div>
     </div>
   </div></div>`;
@@ -1460,7 +1467,7 @@ function generateInvoiceHtml(num, info){
       ${info.address?`<p style="margin:4px 0;font-size:13px;color:#8A8070">${info.address}${info.city?', '+info.city:''}</p>`:''}
       ${info.delivDate?`<p style="margin:4px 0;font-size:13px;color:#8A8070">${fmtDate(info.delivDate)}${info.delivTime?' a las '+info.delivTime:''}</p>`:''}
       ${info.receiver?`<p style="margin:4px 0;font-size:13px;color:#8A8070">Recibe: ${info.receiver}</p>`:''}
-      ${info.card?`<p style="margin:12px 0 0;font-size:13px;color:#C9A84C;font-style:italic">💌 "${info.card}"</p>`:''}
+      ${info.card?`<p style="margin:12px 0 0;font-size:13px;color:#C9A84C;font-style:italic">"${info.card}"</p>`:''}
     </div>
     ${payInfo}
   </div>
@@ -1476,12 +1483,21 @@ async function placeOrder(){
   const g=id=>$('#'+id)?$('#'+id).value.trim():'';
   const req={f_name:'nombre',f_phone:'teléfono',f_email:'correo',f_addr:'dirección',f_city:'ciudad',f_date:'fecha de entrega'};
   for(const k in req){ if(!g(k)){ toast('Falta tu '+req[k],'rose'); $('#'+k)?.focus(); return; } }
+  if(g('f_name').length<3){toast('El nombre debe tener al menos 3 caracteres','rose');$('#f_name')?.focus();return;}
   if(!/^[^@]+@[^@]+\.[^@]+$/.test(g('f_email'))){toast('El correo no parece válido','rose');return;}
   // Validar formato de teléfono (7–15 dígitos, acepta +57, espacios y guiones)
   if(!/^\+?[\d\s\-\(\)]{7,15}$/.test(g('f_phone').replace(/\s/g,''))){toast('El teléfono no es válido (ej: 3001234567)','rose');$('#f_phone')?.focus();return;}
   // Validar que la fecha de entrega sea hoy o en el futuro
   const _hoy=new Date();_hoy.setHours(0,0,0,0);
-  if(new Date(g('f_date')+'T12:00:00')<_hoy){toast('La fecha de entrega debe ser hoy o en el futuro 📅','rose');$('#f_date')?.focus();return;}
+  if(new Date(g('f_date')+'T12:00:00')<_hoy){toast('La fecha de entrega debe ser hoy o en el futuro','rose');$('#f_date')?.focus();return;}
+  // Validar hora: si el pedido es para hoy, no permitir franja ya pasada
+  const _fDate=g('f_date'), _fTime=g('f_time'), _ahora=new Date();
+  if(_fDate===_ahora.toISOString().split('T')[0] && _fTime){
+    const hora=_ahora.getHours();
+    if(_fTime.includes('Mañana') && hora>=12){toast('La franja de mañana ya pasó para hoy. Elige otra hora o fecha.','rose');$('#f_time')?.focus();return;}
+    if(_fTime.includes('Tarde') && hora>=17){toast('La franja de tarde ya pasó para hoy. Elige otra hora o fecha.','rose');$('#f_time')?.focus();return;}
+    if(_fTime.includes('Noche') && hora>=20){toast('La franja de noche ya pasó para hoy. Elige otra hora o fecha.','rose');$('#f_time')?.focus();return;}
+  }
   const t=cartTotals();
   const method=(document.querySelector('input[name=pay]:checked')||{}).value||'Nequi';
   const items=cart.map(i=>{const p=PRODUCTS.find(x=>x.id===i.id);return {name:p.name,qty:i.qty,price:p.price,id:p.id};});
@@ -1706,7 +1722,7 @@ async function renderAdminMain(){
         <td style="display:flex;align-items:center;gap:.6rem"><div style="width:38px;height:44px;border-radius:8px;overflow:hidden">${productMedia(p)}</div>${esc(p.name)}</td>
         <td>${p.cat}</td><td>${money(p.price)}</td>
         <td>${p.stock}</td>
-        <td>${p.featured?'⭐':'—'}</td>
+        <td>${p.featured?'Sí':'—'}</td>
         <td style="white-space:nowrap"><button class="btn btn-ghost btn-sm" onclick="editProduct('${p.id}')">Editar</button> <button class="btn btn-ghost btn-sm" onclick="delProduct('${p.id}')" style="color:var(--bad)">Eliminar</button></td>
       </tr>`).join('')}
       </tbody></table>`;
@@ -1731,7 +1747,7 @@ function exportOrdersCSV(){
     (o.items||[]).map(i=>i.name+' x'+i.qty).join(' | '),o.total,o.pay,o.payStatus||'',o.state,new Date(o.date).toLocaleString('es-CO')]));
   const csv=rows.map(r=>r.map(c=>`"${String(c==null?'':c).replace(/"/g,'""')}"`).join(',')).join('\n');
   const a=document.createElement('a'); a.href='data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(csv);
-  a.download='pedidos-floryalma.csv'; a.click();
+  a.download='pedidos-zoler.csv'; a.click();
 }
 function ordersTable(list){
   if(!list.length) return `<div class="empty">Sin pedidos en esta sección.</div>`;
@@ -1824,6 +1840,8 @@ async function saveProduct(pid,exists){
     dur:g('e_dur')||'7 días',
     featured:$('#e_feat').checked, best:$('#e_best').checked, isNew:$('#e_new').checked};
   if(!data.name){toast('Ponle un nombre al producto','rose');return;}
+  if(data.price<0){toast('El precio no puede ser negativo','rose');return;}
+  if(data.stock<0){toast('El stock no puede ser negativo','rose');return;}
   let prod;
   if(exists==='true'||exists===true){ prod=PRODUCTS.find(x=>x.id===pid); Object.assign(prod,data); }
   else { prod={rating:5,reviews:0,tags:[],care:['Cambia el agua cada 2 días','Recorta los tallos en diagonal'],dur:'7 días',...data}; PRODUCTS.unshift(prod); }
@@ -1943,7 +1961,7 @@ async function render(){
   }
   if(parts[0]==='producto'){ app.innerHTML=viewProduct(parts[1]); renderReviews(parts[1]); requestAnimationFrame(()=>initScrollReveal()); return; }
   if(parts[0]==='wishlist'){ app.innerHTML=viewWishlist(); requestAnimationFrame(()=>initScrollReveal()); return; }
-  if(parts[0]==='checkout'){ app.innerHTML=viewCheckout(); togglePayInfo(); requestAnimationFrame(()=>initScrollReveal()); return; }
+  if(parts[0]==='checkout'){ app.innerHTML=viewCheckout(); selectPay('Nequi'); togglePayInfo(); requestAnimationFrame(()=>initScrollReveal()); return; }
   if(parts[0]==='confirmacion'){ app.innerHTML=await viewConfirmation(parts[1]); requestAnimationFrame(()=>initScrollReveal()); return; }
   if(parts[0]==='faq'){ app.innerHTML=viewFAQ(); document.querySelector('[data-nav="/faq"]')?.classList.add('active'); requestAnimationFrame(()=>initScrollReveal()); return; }
   if(parts[0]==='blog'){ app.innerHTML=viewBlog(); document.querySelector('[data-nav="/blog"]')?.classList.add('active'); requestAnimationFrame(()=>initScrollReveal()); return; }
