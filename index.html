@@ -577,7 +577,7 @@ footer.site .fbot{border-top:1px solid rgba(201,168,76,.12);color:var(--muted-z)
     <nav class="main" id="nav">
       <a href="#/" data-nav="/">Inicio</a>
       <a href="#/catalogo" data-nav="/catalogo">Catálogo</a>
-      <a href="#/catalogo/Ramos Premium" data-nav="premium">Ramos Premium</a>
+      <a href="#/catalogo/Diseños Premium Zoler" data-nav="premium">Premium</a>
       <a href="#/blog" data-nav="/blog">Blog</a>
       <a href="#/faq" data-nav="/faq">FAQ</a>
     </nav>
@@ -617,7 +617,7 @@ footer.site .fbot{border-top:1px solid rgba(201,168,76,.12);color:var(--muted-z)
         <h4>Tienda</h4>
         <ul>
           <li><a href="#/catalogo">Catálogo</a></li>
-          <li><a href="#/catalogo/Ramos Premium">Ramos Premium</a></li>
+          <li><a href="#/catalogo/Diseños Premium Zoler">Diseños Premium</a></li>
           <li><a href="#/catalogo/Amor">Flores para regalar</a></li>
           <li><a href="#/wishlist">Lista de deseos</a></li>
         </ul>
@@ -1002,7 +1002,7 @@ async function applyCoupon(){
   const code=($('#couponIn').value||'').trim().toUpperCase();
   if(!code){appliedCoupon=null;renderCart();return;}
   if(COUPONS[code]){appliedCoupon=code;toast('Cupón aplicado','gold');}
-  else {appliedCoupon=null;toast('Ese cupón no es válido','rose');}
+  else {toast('Ese cupón no es válido','rose');}
   renderCart();
 }
 function openCart(){renderCart();$('#cartDrawer').classList.add('open');$('#overlay').classList.add('open');document.body.classList.add('no-scroll');}
@@ -1223,7 +1223,7 @@ function renderResults(){
     if(f.size.size && !f.size.has(p.size)) return false;
     if(f.avail && p.stock<=0) return false;
     if(p.price>f.max) return false;
-    if(q){ const hay=`${p.name} ${p.desc} ${p.flor} ${p.color} ${p.cat} ${(p.occasions||[]).join(' ')} ${(p.tags||[]).join(' ')}`.toLowerCase(); if(!hay.includes(q)) return false; }
+    if(q){ const norm=s=>(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase(); const hay=norm(`${p.name} ${p.desc} ${p.flor} ${p.color} ${p.cat} ${(p.occasions||[]).join(' ')} ${(p.tags||[]).join(' ')}`); if(!hay.includes(norm(q))) return false; }
     return true;
   });
   const s=f.sort;
@@ -1323,6 +1323,7 @@ function viewWishlist(){
 }
 
 function viewCheckout(){
+  cart=cart.filter(i=>PRODUCTS.find(x=>x.id===i.id));
   if(!cart.length) return `<div class="wrap block" style="padding-top:120px"><div class="empty">Tu carrito está vacío.<br><br><a href="#/catalogo" class="btn btn-primary btn-sm">Ir al catálogo</a></div></div>`;
   const t=cartTotals();
   const today=new Date().toISOString().split('T')[0];
@@ -1501,6 +1502,7 @@ async function placeOrder(){
   }
   const t=cartTotals();
   const method=(document.querySelector('input[name=pay]:checked')||{}).value||'Nequi';
+  for(const ci of cart){ const cp=PRODUCTS.find(x=>x.id===ci.id); if(!cp){toast('Un producto del carrito ya no existe','rose');return;} if(cp.stock<ci.qty){toast(cp.name+' solo tiene '+cp.stock+' unidades disponibles','rose');return;} }
   const items=cart.map(i=>{const p=PRODUCTS.find(x=>x.id===i.id);return {name:p.name,qty:i.qty,price:p.price,id:p.id};});
   const payload={ name:g('f_name'),phone:g('f_phone'),email:g('f_email'),address:g('f_addr'),city:g('f_city'),
     neighborhood:g('f_hood'),deliv_date:g('f_date'),deliv_time:g('f_time'),receiver:g('f_recv'),notes:g('f_notes'),
@@ -1692,7 +1694,7 @@ async function renderAdminMain(){
   document.querySelectorAll('.admin-side a').forEach(a=>a.classList.remove('active'));
   const orders=await DB.fetchOrders(); ORDERS_CACHE=orders;
   if(adminTab==='dashboard'){
-    const rev=orders.filter(o=>o.state!=='Cancelado').reduce((s,o)=>s+(o.total||0),0);
+    const rev=orders.filter(o=>o.state!=='Cancelado'&&o.state!=='Pendiente').reduce((s,o)=>s+(o.total||0),0);
     const pend=orders.filter(o=>o.state==='Pendiente').length;
     const lowStock=PRODUCTS.filter(p=>p.stock>0&&p.stock<=5).length;
     el.innerHTML=`<div class="admin-head"><h2>Resumen</h2><div><button class="btn btn-ghost btn-sm" onclick="seedDB()">Cargar productos de prueba</button> <span class="pill">En tiempo real</span></div></div>
