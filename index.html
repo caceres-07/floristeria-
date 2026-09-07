@@ -425,6 +425,12 @@ html[data-theme="light"] .pay-method-btn:hover,.pay-method-btn.selected{backgrou
 .reveal-scale{opacity:0;transform:scale(.96);transition:opacity .5s cubic-bezier(.2,.7,.3,1),transform .5s cubic-bezier(.2,.7,.3,1)}
 .reveal-scale.visible{opacity:1;transform:scale(1)}
 @keyframes spin{to{transform:rotate(360deg)}}
+/* Ocultar UI hasta que la app cargue */
+body:not(.ready) header.site,
+body:not(.ready) footer.site,
+body:not(.ready) .wa-float,
+body:not(.ready) .chat-btn{opacity:0;pointer-events:none}
+body.ready header.site,body.ready footer.site,body.ready .wa-float,body.ready .chat-btn{opacity:1;transition:opacity .4s ease}
 @media(prefers-reduced-motion:reduce){.reveal,.reveal-left,.reveal-scale{opacity:1;transform:none;transition:none}}
 
 /* ---------- Responsive ---------- */
@@ -635,7 +641,7 @@ footer.site .fbot{border-top:1px solid rgba(201,168,76,.12);color:var(--muted-z)
         <h4>Contacto</h4>
         <ul id="fContact"></ul>
         <div style="display:flex;gap:.5rem;margin-top:.8rem;font-size:.74rem;flex-wrap:wrap;color:var(--muted);letter-spacing:.06em">
-          <span>Nequi</span>·<span>Bancolombia</span>·<span>PSE</span>·<span>Tarjetas</span>
+          <span>Nequi</span>·<span>Bancolombia</span>·<span>Efectivo</span>
         </div>
       </div>
     </div>
@@ -864,7 +870,7 @@ const FAQS = [
   {q:'¿Hacen entregas el mismo día?',a:'Sí. Los pedidos confirmados antes de la 1:00 p. m. se entregan el mismo día dentro de la ciudad. Fuera de ese horario, se programan para el día siguiente.'},
   {q:'¿A qué ciudades llegan?',a:'Realizamos entregas en toda la ciudad y municipios cercanos. En el checkout puedes indicar tu barrio y calcularemos la cobertura.'},
   {q:'¿Puedo incluir una tarjeta con mensaje?',a:'Por supuesto. En el proceso de compra encontrarás un campo para escribir un mensaje personalizado que incluiremos gratis en una tarjeta.'},
-  {q:'¿Qué métodos de pago aceptan?',a:'Nequi, DaviPlata, PSE, tarjetas de débito y crédito, transferencia bancaria y pago en efectivo contra entrega.'},
+  {q:'¿Qué métodos de pago aceptan?',a:'Nequi, Bancolombia, transferencia bancaria y pago en efectivo contra entrega.'},
   {q:'¿Las flores son iguales a las fotos?',a:'Trabajamos con flor fresca de temporada. La composición y los colores se respetan al máximo, aunque alguna variedad puede sustituirse por otra de igual o mayor valor según disponibilidad.'},
 ];
 
@@ -1397,8 +1403,7 @@ function payManualInfo(method){
     return `<div class="care" style="margin-top:.8rem"><b style="font-family:var(--serif);font-size:1.2rem">Efectivo contra entrega</b>
       <p style="font-size:.9rem;margin:.4rem 0">Pagas en efectivo al recibir tu pedido. Ten el valor exacto a la mano si es posible.</p></div>`;
   }
-  return `<div class="care" style="margin-top:.8rem"><b style="font-family:var(--serif);font-size:1.2rem">Pago en línea seguro</b>
-    <p style="font-size:.9rem;margin:.4rem 0">Al confirmar, te llevaremos a la pasarela de Wompi para pagar con Nequi, Bancolombia, PSE o tarjeta. El pedido se confirma automáticamente al aprobarse el pago.</p></div>`;
+  return "";
 }
 function togglePayInfo(){
   const m=(document.querySelector('input[name=pay]:checked')||{}).value||'Nequi';
@@ -1507,7 +1512,7 @@ async function placeOrder(){
   const payload={ name:g('f_name'),phone:g('f_phone'),email:g('f_email'),address:g('f_addr'),city:g('f_city'),
     neighborhood:g('f_hood'),deliv_date:g('f_date'),deliv_time:g('f_time'),receiver:g('f_recv'),notes:g('f_notes'),
     card_message:g('f_card'),payment_method:method,
-    payment_status: method==='Wompi'?'Pendiente de pago':'Por verificar',
+    payment_status: 'Por verificar',
     items, subtotal:t.sub, discount:t.disc, shipping:t.ship, total:t.total, coupon:appliedCoupon };
 
   const btn=document.querySelector('.order-sticky .btn-primary');
@@ -2137,8 +2142,10 @@ function exportOrdersPDF(){
   applySEO();
   fillFooter();
   await initTheme();
+  $('#app').innerHTML='<div style="display:flex;align-items:center;justify-content:center;min-height:80vh"><div style="text-align:center"><div style="width:50px;height:50px;border:2px solid var(--line);border-top-color:var(--gold-z);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 1rem"></div><p style="color:var(--muted);font-size:.85rem;letter-spacing:.06em">Cargando</p></div></div>';
   await loadState();
   await render();
+  document.body.classList.add('ready');
 })();
 
 /* Exponer funciones usadas en atributos onclick */
